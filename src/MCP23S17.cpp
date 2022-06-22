@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2014-2021, Majenko Technologies
+ *               2022, Ivan Labáth
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -43,11 +44,7 @@
  *      MCP23S17 myExpander(&SPI, 10, 0);
  * 
  */
-#ifdef __PIC32MX__
-MCP23S17::MCP23S17(DSPI *spi, uint8_t cs, uint8_t addr) {
-#else
-MCP23S17::MCP23S17(SPIClass *spi, uint8_t cs, uint8_t addr) {
-#endif
+MCP23S17::MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr) {
     _spi = spi;
     _cs = cs;
     _addr = addr;
@@ -76,11 +73,7 @@ MCP23S17::MCP23S17(SPIClass *spi, uint8_t cs, uint8_t addr) {
     _reg[MCP_OLATB] = 0x00;
 }
 
-#ifdef __PIC32MX__
-MCP23S17::MCP23S17(DSPI &spi, uint8_t cs, uint8_t addr) {
-#else
-MCP23S17::MCP23S17(SPIClass &spi, uint8_t cs, uint8_t addr) {
-#endif
+MCP23S17::MCP23S17(_SPIClass &spi, uint8_t cs, uint8_t addr) {
     _spi = &spi;
     _cs = cs;
     _addr = addr;

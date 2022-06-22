@@ -45,12 +45,16 @@
 #endif
 
 class MCP23S17 {
-    private:
+    public:
 #ifdef __PIC32MX__
-        DSPI *_spi; /*! This points to a valid SPI object created from the chipKIT DSPI library. */
+        /*! SPI object created from the chipKIT DSPI library. */
+        typedef DSPI _SPIClass;
 #else
-        SPIClass *_spi; /*! This points to a valid SPI object created from the Arduino SPI library. */
+        /*! SPI object created from the Arduino compatible SPI library. */
+        typedef SPIClass _SPIClass;
 #endif
+    private:
+        _SPIClass *_spi; /*! This points to a valid SPI object */
         uint8_t _cs;    /*! Chip select pin */
         uint8_t _addr;  /*! 3-bit chip address */
     
@@ -78,13 +82,8 @@ class MCP23S17 {
         SPISettings spiSettings = SPISettings((uint32_t)8000000, MSBFIRST, SPI_MODE0);
 
     public:
-#ifdef __PIC32MX__
-        MCP23S17(DSPI *spi, uint8_t cs, uint8_t addr);
-        MCP23S17(DSPI &spi, uint8_t cs, uint8_t addr);
-#else
-        MCP23S17(SPIClass *spi, uint8_t cs, uint8_t addr);
-        MCP23S17(SPIClass &spi, uint8_t cs, uint8_t addr);
-#endif
+        MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr);
+        MCP23S17(_SPIClass &spi, uint8_t cs, uint8_t addr);
         void begin();
         void pinMode(uint8_t pin, uint8_t mode);
         void digitalWrite(uint8_t pin, uint8_t value);
