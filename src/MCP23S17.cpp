@@ -306,8 +306,7 @@ uint8_t MCP23S17::readPort(uint8_t port) {
  *      unsigned int value = myExpander.readPort();
  */
 uint16_t MCP23S17::readPort() {
-    readRegister(MCP_GPIOA);
-    readRegister(MCP_GPIOB);
+    readRegister(MCP_GPIOA, 2);
     return (_reg[MCP_GPIOB] << 8) | _reg[MCP_GPIOA];
 }
 
@@ -341,8 +340,7 @@ void MCP23S17::writePort(uint8_t port, uint8_t val) {
 void MCP23S17::writePort(uint16_t val) {
     _reg[MCP_OLATB] = val >> 8;
     _reg[MCP_OLATA] = val & 0xFF;
-    writeRegister(MCP_OLATA);
-    writeRegister(MCP_OLATB);
+    writeRegister(MCP_OLATA, 2);
 }
 
 /*! This enables the interrupt functionality of a pin.  The interrupt type can be one of:
@@ -445,8 +443,7 @@ void MCP23S17::setMirror(bool m) {
  *      unsigned int pins = myExpander.getInterruptPins();
  */
 uint16_t MCP23S17::getInterruptPins() {
-    readRegister(MCP_INTFA);
-    readRegister(MCP_INTFB);
+    readRegister(MCP_INTFA, 2);
 
     return (_reg[MCP_INTFB] << 8) | _reg[MCP_INTFA];
 }
@@ -461,8 +458,7 @@ uint16_t MCP23S17::getInterruptPins() {
  *      unsigned int pinValues = myExpander.getInterruptValue();
  */
 uint16_t MCP23S17::getInterruptValue() {
-    readRegister(MCP_INTCAPA);
-    readRegister(MCP_INTCAPB);
+    readRegister(MCP_INTCAPA, 2);
 
     return (_reg[MCP_INTCAPB] << 8) | _reg[MCP_INTCAPA];
 } 
