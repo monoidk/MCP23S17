@@ -53,6 +53,20 @@ class MCP23S17 {
         /*! SPI object created from the Arduino compatible SPI library. */
         typedef SPIClass _SPIClass;
 #endif
+
+        // MCP23XXX IOCON settings - initialized as 0 on POR
+        static const uint8_t IOCON_BANK   = 0b10000000;  // Split registers to two banks
+        static const uint8_t IOCON_MIRROR = 0b01000000;  // Mirror INT on both pins
+        static const uint8_t IOCON_SEQOP  = 0b00100000;  // Disable R/W sequential addressing
+        static const uint8_t IOCON_DISSLW = 0b00010000;  // Disable SDA slew rate control (I2C only)
+        static const uint8_t IOCON_HAEN   = 0b00001000;  // Use addressing from hardware address pins (vs. addr 0)
+        static const uint8_t IOCON_ODR    = 0b00000100;  // INT output is open-drain
+        static const uint8_t IOCON_INTPOL = 0b00000010;  // INT output pin active-high (vs. low), ignored if open-drain
+        static const uint8_t IOCON_INTCC  = 0b00000001;  // Interrupt cleared on reading INTCAP (not GPIO) register
+
+        // default IOCON settings for MCP23S17
+        static const uint8_t DEFAULT_IOCON = IOCON_DISSLW | IOCON_HAEN;
+
     private:
         _SPIClass *_spi; /*! This points to a valid SPI object */
         uint8_t _cs;    /*! Chip select pin */
