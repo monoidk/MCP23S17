@@ -98,7 +98,8 @@ class MCP23S17 {
 
     public:
         MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr);
-        MCP23S17(_SPIClass &spi, uint8_t cs, uint8_t addr);
+        MCP23S17(_SPIClass &spi, uint8_t cs, uint8_t addr): MCP23S17(&spi, cs, addr) {};
+
         void begin();
         void pinMode(uint8_t pin, uint8_t mode);
         void digitalWrite(uint8_t pin, uint8_t value);

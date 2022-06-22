@@ -73,35 +73,6 @@ MCP23S17::MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr) {
     _reg[MCP_OLATB] = 0x00;
 }
 
-MCP23S17::MCP23S17(_SPIClass &spi, uint8_t cs, uint8_t addr) {
-    _spi = &spi;
-    _cs = cs;
-    _addr = addr;
-
-    _reg[MCP_IODIRA] = 0xFF;
-    _reg[MCP_IODIRB] = 0xFF;
-    _reg[MCP_IPOLA] = 0x00;
-    _reg[MCP_IPOLB] = 0x00;
-    _reg[MCP_GPINTENA] = 0x00;
-    _reg[MCP_GPINTENB] = 0x00;
-    _reg[MCP_DEFVALA] = 0x00;
-    _reg[MCP_DEFVALB] = 0x00;
-    _reg[MCP_INTCONA] = 0x00;
-    _reg[MCP_INTCONB] = 0x00;
-    _reg[MCP_IOCONA] = DEFAULT_IOCON;
-    _reg[MCP_IOCONB] = DEFAULT_IOCON;
-    _reg[MCP_GPPUA] = 0x00;
-    _reg[MCP_GPPUB] = 0x00;
-    _reg[MCP_INTFA] = 0x00;
-    _reg[MCP_INTFB] = 0x00;
-    _reg[MCP_INTCAPA] = 0x00;
-    _reg[MCP_INTCAPB] = 0x00;
-    _reg[MCP_GPIOA] = 0x00;
-    _reg[MCP_GPIOB] = 0x00;
-    _reg[MCP_OLATA] = 0x00;
-    _reg[MCP_OLATB] = 0x00;
-}
-
 /*! The begin function performs the initial configuration of the IO expander chip.
  *  Not only does it set up the SPI communications, but it also configures the chip
  *  for address-based communication and sets the default parameters and registers
