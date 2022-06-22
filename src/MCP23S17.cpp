@@ -503,10 +503,13 @@ uint8_t MCP23S17::getInterruptAPins() {
     return readRegister8(MCP_INTFA);
 }
 
-/*! This returns a snapshot of the Port-A IO pin states at the moment the last interrupt occured.  Reading
- *  this value clears the interrupt status (and hence the INT pins) for the port.
- *  Until this value is read (or the current live port value is read) no further interrupts can
- *  be indicated.
+/*! This returns a snapshot of the Port-A IO pin states at the moment the last interrupt occured.
+ *
+ *  Reading this getInterruptValue (MCP_INTCAP) or readPort (MCP_GPIO) clears the interrupt status
+ *  (and hence INT pins) for the port, depending on IOCON_INTCC setting and its support on given
+ *  device type. Iff IOCON_INTCC is not supported, both reads clear the interrupt.
+ *
+ *  Until the interrupt is cleared, no further interrupts can be indicated (on the given port?).
  *
  *  Example:
  *
@@ -526,10 +529,13 @@ uint8_t MCP23S17::getInterruptBPins() {
     return readRegister8(MCP_INTFB);
 }
 
-/*! This returns a snapshot of the Port-B IO pin states at the moment the last interrupt occured.  Reading
- *  this value clears the interrupt status (and hence the INT pins) for the port.
- *  Until this value is read (or the current live port value is read) no further interrupts can
- *  be indicated.
+/*! This returns a snapshot of the Port-B IO pin states at the moment the last interrupt occured.
+ *
+ *  Reading this getInterruptValue (MCP_INTCAP) or readPort (MCP_GPIO) clears the interrupt status
+ *  (and hence INT pins) for the port, depending on IOCON_INTCC setting and its support on given
+ *  device type. Iff IOCON_INTCC is not supported, both reads clear the interrupt.
+ *
+ *  Until the interrupt is cleared, no further interrupts can be indicated (on the given port?).
  *
  *  Example:
  *

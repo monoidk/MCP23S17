@@ -62,7 +62,7 @@ class MCP23S17 {
         static const uint8_t IOCON_HAEN   = 0b00001000;  // Use addressing from hardware address pins (vs. addr 0)
         static const uint8_t IOCON_ODR    = 0b00000100;  // INT output is open-drain
         static const uint8_t IOCON_INTPOL = 0b00000010;  // INT output pin active-high (vs. low), ignored if open-drain
-        static const uint8_t IOCON_INTCC  = 0b00000001;  // Interrupt cleared on reading INTCAP (not GPIO) register
+        static const uint8_t IOCON_INTCC  = 0b00000001;  // Interrupt cleared on reading INTCAP (not GPIO) register (MCP23XX8 only?)
 
         // default IOCON settings for MCP23S17
         static const uint8_t DEFAULT_IOCON = IOCON_DISSLW | IOCON_HAEN;
