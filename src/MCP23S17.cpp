@@ -130,8 +130,8 @@ void MCP23S17::begin() {
 /*! This private function reads a value from the specified register on the chip and
  *  stores it in the _reg array for later usage.
  */
-void MCP23S17::readRegister(uint8_t addr) {
-    if (addr > 21) {
+void MCP23S17::readRegister(uint8_t addr, uint8_t count) {
+    if ((uint32_t) addr + count > 22) {
         return;
     }
     uint8_t cmd = 0b01000001 | ((_addr & 0b111) << 1);
@@ -139,7 +139,9 @@ void MCP23S17::readRegister(uint8_t addr) {
     ::digitalWrite(_cs, LOW);
     _spi->transfer(cmd);
     _spi->transfer(addr);
-    _reg[addr] = _spi->transfer(0xFF);
+    for (uint32_t i = 0; i < count; ++i) {
+        _reg[addr++] = _spi->transfer(0xFF);
+    }
     ::digitalWrite(_cs, HIGH);
     _spi->endTransaction();
 }
@@ -147,8 +149,8 @@ void MCP23S17::readRegister(uint8_t addr) {
 /*! This private function writes the current value of a register (as stored in the
  *  _reg array) out to the register in the chip.
  */
-void MCP23S17::writeRegister(uint8_t addr) {
-    if (addr > 21) {
+void MCP23S17::writeRegister(uint8_t addr, uint8_t count) {
+    if ((uint32_t) addr + count > 22) {
         return;
     }
     uint8_t cmd = 0b01000000 | ((_addr & 0b111) << 1);
@@ -156,7 +158,9 @@ void MCP23S17::writeRegister(uint8_t addr) {
     ::digitalWrite(_cs, LOW);
     _spi->transfer(cmd);
     _spi->transfer(addr);
-    _spi->transfer(_reg[addr]);
+    for (uint32_t i = 0; i < count; ++i) {
+        _spi->transfer(_reg[addr++]);
+    }
     ::digitalWrite(_cs, HIGH);
     _spi->endTransaction();
 }
@@ -165,16 +169,7 @@ void MCP23S17::writeRegister(uint8_t addr) {
  *  ensure the _reg array contains all the correct current values.
  */
 void MCP23S17::readAll() {
-    uint8_t cmd = 0b01000001 | ((_addr & 0b111) << 1);
-    _spi->beginTransaction(spiSettings);
-    ::digitalWrite(_cs, LOW);
-    _spi->transfer(cmd);
-    _spi->transfer(0);
-    for (uint8_t i = 0; i < 22; i++) {
-        _reg[i] = _spi->transfer(0xFF);
-    }
-    ::digitalWrite(_cs, HIGH);
-    _spi->endTransaction();
+    readRegister(0, 22);
 }
 
 /*! This private function performs a bulk write of all the data in the _reg array
@@ -182,16 +177,7 @@ void MCP23S17::readAll() {
  *  of the chip.
  */
 void MCP23S17::writeAll() {
-    uint8_t cmd = 0b01000000 | ((_addr & 0b111) << 1);
-    _spi->beginTransaction(spiSettings);
-    ::digitalWrite(_cs, LOW);
-    _spi->transfer(cmd);
-    _spi->transfer(0);
-    for (uint8_t i = 0; i < 22; i++) {
-        _spi->transfer(_reg[i]);
-    }
-    ::digitalWrite(_cs, HIGH);
-    _spi->endTransaction();
+    writeRegister(0, 22);
 }
     
 /*! Just like the pinMode() function of the Arduino API, this function sets the

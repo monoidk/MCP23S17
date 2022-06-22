@@ -74,8 +74,8 @@ class MCP23S17 {
             MCP_OLATA,      MCP_OLATB
         };
 
-        void readRegister(uint8_t addr); 
-        void writeRegister(uint8_t addr);
+        void readRegister(uint8_t addr, uint8_t count = 1);
+        void writeRegister(uint8_t addr, uint8_t count = 1);
         void readAll();
         void writeAll();
     
