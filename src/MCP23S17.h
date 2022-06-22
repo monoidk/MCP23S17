@@ -111,11 +111,11 @@ class MCP23S17 {
         void writePort(uint16_t val);
         void enableInterrupt(uint8_t pin, uint8_t type);
         void disableInterrupt(uint8_t pin);
-        void setMirror(boolean m);
+        void setMirror(bool m);
         uint16_t getInterruptPins();
         uint16_t getInterruptValue();
         void setInterruptLevel(uint8_t level);
-        void setInterruptOD(boolean openDrain);
+        void setInterruptOD(bool openDrain);
         uint8_t getInterruptAPins();
         uint8_t getInterruptAValue();
         uint8_t getInterruptBPins();

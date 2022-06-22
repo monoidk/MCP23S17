@@ -427,7 +427,7 @@ void MCP23S17::disableInterrupt(uint8_t pin) {
  *
  *      myExpander.setMirror(true);
  */
-void MCP23S17::setMirror(boolean m) {
+void MCP23S17::setMirror(bool m) {
     if (m) {
         _reg[MCP_IOCONA] |= (1<<6);
         _reg[MCP_IOCONB] |= (1<<6);
@@ -494,7 +494,7 @@ void MCP23S17::setInterruptLevel(uint8_t level) {
  *
  *      myExpander.setInterruptOD(true);
  */
-void MCP23S17::setInterruptOD(boolean openDrain) {
+void MCP23S17::setInterruptOD(bool openDrain) {
     if (openDrain) {
         _reg[MCP_IOCONA] |= (1<<2);
         _reg[MCP_IOCONB] |= (1<<2);
