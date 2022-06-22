@@ -101,8 +101,8 @@ void MCP23S17::begin() {
 /*! This private function reads a value from the specified register on the chip and
  *  stores it in the _reg array for later usage.
  */
-void MCP23S17::readRegister(uint8_t addr, uint8_t count) {
-    if ((uint32_t) addr + count > MCP_REG_COUNT) {
+void MCP23S17::readRegister(uint8_t addr, uint8_t size) {
+    if ((uint32_t) addr + size > MCP_REG_COUNT) {
         return;
     }
     uint8_t cmd = 0b01000001 | ((_addr & 0b111) << 1);
@@ -110,7 +110,7 @@ void MCP23S17::readRegister(uint8_t addr, uint8_t count) {
     ::digitalWrite(_cs, LOW);
     _spi->transfer(cmd);
     _spi->transfer(addr);
-    for (uint32_t i = 0; i < count; ++i) {
+    for (uint32_t i = 0; i < size; ++i) {
         _reg[addr++] = _spi->transfer(0xFF);
     }
     ::digitalWrite(_cs, HIGH);
@@ -120,8 +120,8 @@ void MCP23S17::readRegister(uint8_t addr, uint8_t count) {
 /*! This private function writes the current value of a register (as stored in the
  *  _reg array) out to the register in the chip.
  */
-void MCP23S17::writeRegister(uint8_t addr, uint8_t count) {
-    if ((uint32_t) addr + count > MCP_REG_COUNT) {
+void MCP23S17::writeRegister(uint8_t addr, uint8_t size) {
+    if ((uint32_t) addr + size > MCP_REG_COUNT) {
         return;
     }
     uint8_t cmd = 0b01000000 | ((_addr & 0b111) << 1);
@@ -129,7 +129,7 @@ void MCP23S17::writeRegister(uint8_t addr, uint8_t count) {
     ::digitalWrite(_cs, LOW);
     _spi->transfer(cmd);
     _spi->transfer(addr);
-    for (uint32_t i = 0; i < count; ++i) {
+    for (uint32_t i = 0; i < size; ++i) {
         _spi->transfer(_reg[addr++]);
     }
     ::digitalWrite(_cs, HIGH);
