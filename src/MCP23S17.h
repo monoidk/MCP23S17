@@ -75,6 +75,8 @@ class MCP23S17 {
         void readAll();
         void writeAll();
     
+        SPISettings spiSettings = SPISettings((uint32_t)8000000, MSBFIRST, SPI_MODE0);
+
     public:
 #ifdef __PIC32MX__
         MCP23S17(DSPI *spi, uint8_t cs, uint8_t addr);
