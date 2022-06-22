@@ -58,8 +58,6 @@ class MCP23S17 {
         uint8_t _cs;    /*! Chip select pin */
         uint8_t _addr;  /*! 3-bit chip address */
     
-        uint8_t _reg[22];   /*! Local mirrors of the 22 internal registers of the MCP23S17 chip */
-
         enum {
             MCP_IODIRA,     MCP_IODIRB,
             MCP_IPOLA,      MCP_IPOLB,
@@ -71,8 +69,11 @@ class MCP23S17 {
             MCP_INTFA,      MCP_INTFB,
             MCP_INTCAPA,    MCP_INTCAPB,
             MCP_GPIOA,      MCP_GPIOB,
-            MCP_OLATA,      MCP_OLATB
+            MCP_OLATA,      MCP_OLATB,
+            MCP_REG_COUNT
         };
+
+        uint8_t _reg[MCP_REG_COUNT];   /*! Local mirrors of the 22 internal registers of the MCP23S17 chip */
 
         void readRegister(uint8_t addr, uint8_t count = 1);
         void writeRegister(uint8_t addr, uint8_t count = 1);

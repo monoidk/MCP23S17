@@ -131,7 +131,7 @@ void MCP23S17::begin() {
  *  stores it in the _reg array for later usage.
  */
 void MCP23S17::readRegister(uint8_t addr, uint8_t count) {
-    if ((uint32_t) addr + count > 22) {
+    if ((uint32_t) addr + count > MCP_REG_COUNT) {
         return;
     }
     uint8_t cmd = 0b01000001 | ((_addr & 0b111) << 1);
@@ -150,7 +150,7 @@ void MCP23S17::readRegister(uint8_t addr, uint8_t count) {
  *  _reg array) out to the register in the chip.
  */
 void MCP23S17::writeRegister(uint8_t addr, uint8_t count) {
-    if ((uint32_t) addr + count > 22) {
+    if ((uint32_t) addr + count > MCP_REG_COUNT) {
         return;
     }
     uint8_t cmd = 0b01000000 | ((_addr & 0b111) << 1);
@@ -169,7 +169,7 @@ void MCP23S17::writeRegister(uint8_t addr, uint8_t count) {
  *  ensure the _reg array contains all the correct current values.
  */
 void MCP23S17::readAll() {
-    readRegister(0, 22);
+    readRegister(0, MCP_REG_COUNT);
 }
 
 /*! This private function performs a bulk write of all the data in the _reg array
@@ -177,7 +177,7 @@ void MCP23S17::readAll() {
  *  of the chip.
  */
 void MCP23S17::writeAll() {
-    writeRegister(0, 22);
+    writeRegister(0, MCP_REG_COUNT);
 }
     
 /*! Just like the pinMode() function of the Arduino API, this function sets the
