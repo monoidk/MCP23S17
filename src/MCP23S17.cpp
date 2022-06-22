@@ -272,8 +272,7 @@ uint8_t MCP23S17::digitalRead(uint8_t pin) {
         case OUTPUT: 
             return _reg[latReg] & (1<<pin) ? HIGH : LOW;
         case INPUT:
-            readRegister(portReg);
-            return _reg[portReg] & (1<<pin) ? HIGH : LOW;
+            return readRegister8(portReg) & (1<<pin) ? HIGH : LOW;
     }
     return 0;
 }
@@ -289,11 +288,9 @@ uint8_t MCP23S17::digitalRead(uint8_t pin) {
  */
 uint8_t MCP23S17::readPort(uint8_t port) {
     if (port == 0) {
-        readRegister(MCP_GPIOA);
-        return _reg[MCP_GPIOA];
+        return readRegister8(MCP_GPIOA);
     } else {
-        readRegister(MCP_GPIOB);
-        return _reg[MCP_GPIOB];
+        return readRegister8(MCP_GPIOB);
     }
 }
 
@@ -306,8 +303,7 @@ uint8_t MCP23S17::readPort(uint8_t port) {
  *      unsigned int value = myExpander.readPort();
  */
 uint16_t MCP23S17::readPort() {
-    readRegister(MCP_GPIOA, 2);
-    return (_reg[MCP_GPIOB] << 8) | _reg[MCP_GPIOA];
+    return readRegister16(MCP_GPIOA);
 }
 
 /*! This writes an 8-bit value to one of the two IO port banks (A/B) on the chip.
@@ -443,9 +439,7 @@ void MCP23S17::setMirror(bool m) {
  *      unsigned int pins = myExpander.getInterruptPins();
  */
 uint16_t MCP23S17::getInterruptPins() {
-    readRegister(MCP_INTFA, 2);
-
-    return (_reg[MCP_INTFB] << 8) | _reg[MCP_INTFA];
+    return readRegister16(MCP_INTFA);
 }
 
 /*! This returns a snapshot of the IO pin states at the moment the last interrupt occured.  Reading
@@ -458,9 +452,7 @@ uint16_t MCP23S17::getInterruptPins() {
  *      unsigned int pinValues = myExpander.getInterruptValue();
  */
 uint16_t MCP23S17::getInterruptValue() {
-    readRegister(MCP_INTCAPA, 2);
-
-    return (_reg[MCP_INTCAPB] << 8) | _reg[MCP_INTCAPA];
+    return readRegister16(MCP_INTCAPA);
 } 
 
 /*! This sets the "active" level for an interrupt.  HIGH means the interrupt pin
@@ -508,8 +500,7 @@ void MCP23S17::setInterruptOD(bool openDrain) {
  *      unsigned int pins = myExpander.getInterruptAPins();
  */
 uint8_t MCP23S17::getInterruptAPins() {
-    readRegister(MCP_INTFA);
-    return  _reg[MCP_INTFA];
+    return readRegister8(MCP_INTFA);
 }
 
 /*! This returns a snapshot of the Port-A IO pin states at the moment the last interrupt occured.  Reading
@@ -522,8 +513,7 @@ uint8_t MCP23S17::getInterruptAPins() {
  *      unsigned int pinValues = myExpander.getInterruptAValue();
  */
 uint8_t MCP23S17::getInterruptAValue() {
-    readRegister(MCP_INTCAPA);
-    return _reg[MCP_INTCAPA];
+    return readRegister8(MCP_INTCAPA);
 } 
 
 /*! This function returns an 8-bit bitmap of the Port-B pin or pins that have caused an interrupt to fire.
@@ -533,8 +523,7 @@ uint8_t MCP23S17::getInterruptAValue() {
  *      unsigned int pins = myExpander.getInterruptBPins();
  */
 uint8_t MCP23S17::getInterruptBPins() {
-    readRegister(MCP_INTFB);
-    return _reg[MCP_INTFB];
+    return readRegister8(MCP_INTFB);
 }
 
 /*! This returns a snapshot of the Port-B IO pin states at the moment the last interrupt occured.  Reading
@@ -547,6 +536,5 @@ uint8_t MCP23S17::getInterruptBPins() {
  *      unsigned int pinValues = myExpander.getInterruptBValue();
  */
 uint8_t MCP23S17::getInterruptBValue() {
-    readRegister(MCP_INTCAPB);
-    return _reg[MCP_INTCAPB];
+    return readRegister8(MCP_INTCAPB);
 } 
