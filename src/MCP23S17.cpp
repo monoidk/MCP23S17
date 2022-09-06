@@ -73,6 +73,16 @@ MCP23S17::MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr) {
     _reg[MCP_OLATB] = 0x00;
 }
 
+void MCP23S17::spi_begin() {
+    _spi->beginTransaction(spiSettings);
+    ::digitalWrite(_cs, LOW);
+}
+
+void MCP23S17::spi_end() {
+    ::digitalWrite(_cs, HIGH);
+    _spi->endTransaction();
+}
+
 /*! The begin function performs the initial configuration of the IO expander chip.
  *  Not only does it set up the SPI communications, but it also configures the chip
  *  for address-based communication and sets the default parameters and registers
@@ -88,13 +98,11 @@ void MCP23S17::begin() {
     ::pinMode(_cs, OUTPUT);
     ::digitalWrite(_cs, HIGH);
     uint8_t cmd = 0b01000000;
-    _spi->beginTransaction(spiSettings);
-    ::digitalWrite(_cs, LOW);
+    spi_begin();
     _spi->transfer(cmd);
     _spi->transfer(MCP_IOCONA);
     _spi->transfer(_reg[MCP_IOCONA]);
-    ::digitalWrite(_cs, HIGH);
-    _spi->endTransaction();
+    spi_end();
     writeAll();
 }
 
@@ -106,15 +114,13 @@ void MCP23S17::readRegister(uint8_t addr, uint8_t size) {
         return;
     }
     uint8_t cmd = 0b01000001 | ((_addr & 0b111) << 1);
-    _spi->beginTransaction(spiSettings);
-    ::digitalWrite(_cs, LOW);
+    spi_begin();
     _spi->transfer(cmd);
     _spi->transfer(addr);
     for (uint32_t i = 0; i < size; ++i) {
         _reg[addr++] = _spi->transfer(0xFF);
     }
-    ::digitalWrite(_cs, HIGH);
-    _spi->endTransaction();
+    spi_end();
 }
 
 /*! This private function writes the current value of a register (as stored in the
@@ -125,15 +131,13 @@ void MCP23S17::writeRegister(uint8_t addr, uint8_t size) {
         return;
     }
     uint8_t cmd = 0b01000000 | ((_addr & 0b111) << 1);
-    _spi->beginTransaction(spiSettings);
-    ::digitalWrite(_cs, LOW);
+    spi_begin();
     _spi->transfer(cmd);
     _spi->transfer(addr);
     for (uint32_t i = 0; i < size; ++i) {
         _spi->transfer(_reg[addr++]);
     }
-    ::digitalWrite(_cs, HIGH);
-    _spi->endTransaction();
+    spi_end();
 }
 
 /*! This private function performs a bulk read on all the registers in the chip to

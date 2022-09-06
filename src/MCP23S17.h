@@ -89,6 +89,9 @@ class MCP23S17 {
 
         uint8_t _reg[MCP_REG_COUNT];   /*! Local mirrors of the 22 internal registers of the MCP23S17 chip */
 
+        void spi_begin();
+        void spi_end();
+
         void readRegister(uint8_t addr, uint8_t size = 1);
         /* Read register and return value (1 byte) */
         uint8_t readRegister8(uint8_t addr) { readRegister(addr, 1); return _reg[addr]; }
