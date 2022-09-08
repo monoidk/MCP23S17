@@ -70,7 +70,7 @@ class MCP23S17 {
     private:
         _SPIClass *_spi; /*! This points to a valid SPI object */
         uint8_t _cs;    /*! Chip select pin */
-        uint8_t _addr;  /*! 3-bit chip address */
+        uint8_t _chip_addr;  /*! 3-bit chip address */
     
         enum {
             MCP_IODIRA,     MCP_IODIRB,

@@ -47,7 +47,7 @@
 MCP23S17::MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr) {
     _spi = spi;
     _cs = cs;
-    _addr = addr;
+    _chip_addr = addr;
 
     _reg[MCP_IODIRA] = 0xFF;
     _reg[MCP_IODIRB] = 0xFF;
@@ -113,7 +113,7 @@ void MCP23S17::readRegister(uint8_t addr, uint8_t size) {
     if ((uint32_t) addr + size > MCP_REG_COUNT) {
         return;
     }
-    uint8_t cmd = 0b01000001 | ((_addr & 0b111) << 1);
+    uint8_t cmd = 0b01000001 | ((_chip_addr & 0b111) << 1);
     spi_begin();
     _spi->transfer(cmd);
     _spi->transfer(addr);
@@ -130,7 +130,7 @@ void MCP23S17::writeRegister(uint8_t addr, uint8_t size) {
     if ((uint32_t) addr + size > MCP_REG_COUNT) {
         return;
     }
-    uint8_t cmd = 0b01000000 | ((_addr & 0b111) << 1);
+    uint8_t cmd = 0b01000000 | ((_chip_addr & 0b111) << 1);
     spi_begin();
     _spi->transfer(cmd);
     _spi->transfer(addr);
