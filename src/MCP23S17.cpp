@@ -94,15 +94,19 @@ void MCP23S17::spi_end() {
  *
  */
 void MCP23S17::begin() {
+    // Should we be initializing SPI?
+    // It is documented in doc, but seems inappropriate.
     _spi->begin();
     ::pinMode(_cs, OUTPUT);
     ::digitalWrite(_cs, HIGH);
+    // first enable HAEN
     uint8_t cmd = 0b01000000;
     spi_begin();
     _spi->transfer(cmd);
     _spi->transfer(MCP_IOCONA);
     _spi->transfer(_reg[MCP_IOCONA]);
     spi_end();
+    // then configure rest
     writeAll();
 }
 
