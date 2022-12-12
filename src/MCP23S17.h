@@ -97,10 +97,7 @@ class MCP23S17 {
         uint8_t readRegister8(uint8_t addr) { readRegister(addr, 1); return _reg[addr]; }
         /* Read register and return value (2 bytes, little-endian) */
         uint16_t getRegister16(uint8_t addr) { return (((uint16_t) _reg[addr + 1]) << 8) | _reg[addr]; }
-        uint16_t readRegister16(uint8_t addr) {
-            readRegister(addr, 2);
-            return getRegister16(addr);
-        }
+        uint16_t readRegister16(uint8_t addr) { readRegister(addr, 2); return getRegister16(addr); }
         void writeRegister(uint8_t addr, uint8_t size = 1);
         void readAll();
         void writeAll();
