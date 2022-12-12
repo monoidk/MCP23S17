@@ -202,30 +202,15 @@ void MCP23S17::pinMode(uint8_t pin, uint8_t mode) {
     if (pin >= 16) {
         return;
     }
-    uint8_t dirReg = MCP_IODIRA;
-    uint8_t puReg = MCP_GPPUA;
-    if (pin >= 8) {
-        pin -= 8;
-        dirReg = MCP_IODIRB;
-        puReg = MCP_GPPUB;
-    }
-
     switch (mode) {
         case OUTPUT:
-            _reg[dirReg] &= ~(1<<pin);
-            writeRegister(dirReg);
+            setDir(pin, OUTPUT);
             break;
 
         case INPUT:
         case INPUT_PULLUP:
-            _reg[dirReg] |= (1<<pin);
-            writeRegister(dirReg);
-            if (mode == INPUT_PULLUP) {
-                _reg[puReg] |= (1<<pin);
-            } else {
-                _reg[puReg] &= ~(1<<pin);
-            }
-            writeRegister(puReg);
+            setDir(pin, INPUT);
+            enablePullup(pin, (mode == INPUT_PULLUP));
             break;
     }
 }
