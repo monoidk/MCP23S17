@@ -384,9 +384,7 @@ void MCP23S17::writePort(uint8_t port, uint8_t val) {
  *      myExpander.writePort(0x55AA);
  */
 void MCP23S17::writePort(uint16_t val) {
-    _reg[MCP_OLATB] = val >> 8;
-    _reg[MCP_OLATA] = val & 0xFF;
-    writeRegister(MCP_OLATA, 2);
+    writeRegister16(MCP_OLATA, val);
 }
 
 /*! This enables the interrupt functionality of a pin.  The interrupt type can be one of:
