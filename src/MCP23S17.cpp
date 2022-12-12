@@ -2,30 +2,30 @@
  * Copyright (c) 2014-2021, Majenko Technologies
  *               2022, Ivan Labáth
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, 
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
- *  1. Redistributions of source code must retain the above copyright notice, 
+ *
+ *  1. Redistributions of source code must retain the above copyright notice,
  *     this list of conditions and the following disclaimer.
- * 
+ *
  *  2. Redistributions in binary form must reproduce the above copyright notice,
  *     this list of conditions and the following disclaimer in the documentation
  *      and/or other materials provided with the distribution.
- * 
+ *
  *  3. Neither the name of Majenko Technologies nor the names of its contributors may be used
- *     to endorse or promote products derived from this software without 
+ *     to endorse or promote products derived from this software without
  *     specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE 
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
@@ -38,11 +38,11 @@
  *  to use when communicating with the chip.  The third is the internal
  *  address number of the chip.  This is controlled by the three Ax pins
  *  on the chip.
- *  
+ *
  *  Example:
  *
  *      MCP23S17 myExpander(&SPI, 10, 0);
- * 
+ *
  */
 MCP23S17::MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr) {
     _spi = spi;
@@ -182,7 +182,7 @@ void MCP23S17::readAll() {
 void MCP23S17::writeAll() {
     writeRegister(0, MCP_REG_COUNT);
 }
-    
+
 /*! Just like the pinMode() function of the Arduino API, this function sets the
  *  direction of the pin.  The first parameter is the pin nimber (0-15) to use,
  *  and the second parameter is the direction of the pin.  There are standard
@@ -294,7 +294,7 @@ void MCP23S17::enablePullup(uint8_t pin, bool enable) {
     }
     writeRegister(puReg);
 }
-    
+
 /*! This will return the current state of a pin set to INPUT, or the last
  *  value written to a pin set to OUTPUT.
  *
@@ -400,7 +400,7 @@ void MCP23S17::writePort(uint16_t val) {
  *  captured port status at the time of the interrupt is read using getInterruptValue.
  *
  *  Example:
- * 
+ *
  *      myExpander.enableInterrupt(4, RISING);
  */
 void MCP23S17::enableInterrupt(uint8_t pin, uint8_t type) {
@@ -463,7 +463,7 @@ void MCP23S17::disableInterrupt(uint8_t pin) {
 
 /*! The two IO banks can have their INT pins connected together.
  *  This enables you to monitor both banks with just one interrupt pin
- *  on the host microcontroller.  Calling setMirror with a parameter of 
+ *  on the host microcontroller.  Calling setMirror with a parameter of
  *  *true* will enable this feature.  Calling it with *false* will disable
  *  it.
  *
@@ -503,7 +503,7 @@ uint16_t MCP23S17::getInterruptPins() {
  */
 uint16_t MCP23S17::getInterruptValue() {
     return readRegister16(MCP_INTCAPA);
-} 
+}
 
 /*! This sets the "active" level for an interrupt.  HIGH means the interrupt pin
  *  will go HIGH when an interrupt occurs, LOW means it will go LOW.
@@ -567,7 +567,7 @@ uint8_t MCP23S17::getInterruptAPins() {
  */
 uint8_t MCP23S17::getInterruptAValue() {
     return readRegister8(MCP_INTCAPA);
-} 
+}
 
 /*! This function returns an 8-bit bitmap of the Port-B pin or pins that have caused an interrupt to fire.
  *
@@ -593,4 +593,4 @@ uint8_t MCP23S17::getInterruptBPins() {
  */
 uint8_t MCP23S17::getInterruptBValue() {
     return readRegister8(MCP_INTCAPB);
-} 
+}
