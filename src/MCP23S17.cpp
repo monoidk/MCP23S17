@@ -313,23 +313,14 @@ uint8_t MCP23S17::digitalRead(uint8_t pin) {
     if (pin >= 16) {
         return 0;
     }
-    uint8_t dirReg = MCP_IODIRA;
-    uint8_t portReg = MCP_GPIOA;
-    uint8_t latReg = MCP_OLATA;
-    if (pin >= 8) {
-        pin -= 8;
-        dirReg = MCP_IODIRB;
-        portReg = MCP_GPIOB;
-        latReg = MCP_OLATB;
-    }
 
-    uint8_t mode = (_reg[dirReg] & (1<<pin)) == 0 ? OUTPUT : INPUT;
+    uint8_t mode = (getRegister16(MCP_IODIRA) & (1<<pin)) == 0 ? OUTPUT : INPUT;
 
     switch (mode) {
-        case OUTPUT: 
-            return _reg[latReg] & (1<<pin) ? HIGH : LOW;
+        case OUTPUT:
+            return getRegister16(MCP_OLATA) & (1<<pin) ? HIGH : LOW;
         case INPUT:
-            return readRegister8(portReg) & (1<<pin) ? HIGH : LOW;
+            return readRegister16(MCP_GPIOA) & (1<<pin) ? HIGH : LOW;
     }
     return 0;
 }
