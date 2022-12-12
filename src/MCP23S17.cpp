@@ -473,11 +473,11 @@ void MCP23S17::disableInterrupt(uint8_t pin) {
  */
 void MCP23S17::setMirror(bool m) {
     if (m) {
-        _reg[MCP_IOCONA] |= (1<<6);
-        _reg[MCP_IOCONB] |= (1<<6);
+        _reg[MCP_IOCONA] |= IOCON_MIRROR;
+        _reg[MCP_IOCONB] |= IOCON_MIRROR;
     } else {
-        _reg[MCP_IOCONA] &= ~(1<<6);
-        _reg[MCP_IOCONB] &= ~(1<<6);
+        _reg[MCP_IOCONA] &= ~IOCON_MIRROR;
+        _reg[MCP_IOCONB] &= ~IOCON_MIRROR;
     }
     writeRegister(MCP_IOCONA);
 }
@@ -514,11 +514,11 @@ uint16_t MCP23S17::getInterruptValue() {
  */
 void MCP23S17::setInterruptLevel(uint8_t level) {
     if (level == LOW) {
-        _reg[MCP_IOCONA] &= ~(1<<1);
-        _reg[MCP_IOCONB] &= ~(1<<1);
+        _reg[MCP_IOCONA] &= ~IOCON_INTPOL;
+        _reg[MCP_IOCONB] &= ~IOCON_INTPOL;
     } else {
-        _reg[MCP_IOCONA] |= (1<<1);
-        _reg[MCP_IOCONB] |= (1<<1);
+        _reg[MCP_IOCONA] |= IOCON_INTPOL;
+        _reg[MCP_IOCONB] |= IOCON_INTPOL;
     }
     writeRegister(MCP_IOCONA);
 }
@@ -534,11 +534,11 @@ void MCP23S17::setInterruptLevel(uint8_t level) {
  */
 void MCP23S17::setInterruptOD(bool openDrain) {
     if (openDrain) {
-        _reg[MCP_IOCONA] |= (1<<2);
-        _reg[MCP_IOCONB] |= (1<<2);
+        _reg[MCP_IOCONA] |= IOCON_ODR;
+        _reg[MCP_IOCONB] |= IOCON_ODR;
     } else {
-        _reg[MCP_IOCONA] &= ~(1<<2);
-        _reg[MCP_IOCONB] &= ~(1<<2);
+        _reg[MCP_IOCONA] &= ~IOCON_ODR;
+        _reg[MCP_IOCONB] &= ~IOCON_ODR;
     }
     writeRegister(MCP_IOCONA);
 }
