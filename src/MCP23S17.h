@@ -136,6 +136,7 @@ class MCP23S17 {
         uint8_t getInterruptBPins();
         uint8_t getInterruptBValue();
 
+        void setDir(uint8_t pin, uint8_t mode);
         void enablePullup(uint8_t pin, bool enable);
         bool getEnabledPullup(uint8_t pin) { return !!(getEnabledPullups() & (1l << pin)); }
         uint16_t getEnabledPullups() { return getRegister16(MCP_GPPUA); };

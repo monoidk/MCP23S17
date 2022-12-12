@@ -290,6 +290,32 @@ void MCP23S17::enablePullup(uint8_t pin, bool enable) {
     writeRegister16(MCP_GPPUA, pu);
 }
 
+/*! Set pin direction as INPUT or OUTPUT.
+ *
+ *  The first parameter is the pin nimber (0-15) to use,
+ *  and the second parameter is the direction of the pin.
+ *  Supported values are
+ *
+ *  * OUTPUT
+ *  * INPUT
+ *
+ *  Example:
+ *
+ *      myExpander.setDir(5, INPUT);
+ */
+void MCP23S17::setDir(uint8_t pin, uint8_t mode) {
+    if (pin >= 16) {
+        return;
+    }
+    uint16_t dir = getRegister16(MCP_IODIRA);
+    switch (mode) {
+        case OUTPUT: dir &= ~(1<<pin); break;
+        case INPUT:  dir |= (1<<pin);  break;
+        default: return;
+    }
+    writeRegister16(MCP_IODIRA, dir);
+}
+
 /*! This will return the current state of a pin set to INPUT, or the last
  *  value written to a pin set to OUTPUT.
  *
