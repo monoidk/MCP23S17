@@ -205,6 +205,7 @@ void MCP23S17::pinMode(uint8_t pin, uint8_t mode) {
     switch (mode) {
         case OUTPUT:
             setDir(pin, OUTPUT);
+            enablePullup(pin, false);
             break;
 
         case INPUT:
