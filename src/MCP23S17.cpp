@@ -335,11 +335,10 @@ uint8_t MCP23S17::digitalRead(uint8_t pin) {
  *      byte portA = myExpander.readPort(0);
  */
 uint8_t MCP23S17::readPort(uint8_t port) {
-    if (port == 0) {
-        return readRegister8(MCP_GPIOA);
-    } else {
-        return readRegister8(MCP_GPIOB);
+    if (port >= 2) {
+        return -1;
     }
+    return readRegister8(MCP_GPIOA + port);
 }
 
 /*! This is a full 16-bit version of the parameterised readPort function.  This
@@ -364,13 +363,9 @@ uint16_t MCP23S17::readPort() {
  *      myExpander.writePort(0, 0x55);
  */
 void MCP23S17::writePort(uint8_t port, uint8_t val) {
-    if (port == 0) {
-        _reg[MCP_OLATA] = val;
-        writeRegister(MCP_OLATA);
-    } else {
-        _reg[MCP_OLATB] = val;
-        writeRegister(MCP_OLATB);
-    }
+    if (port >= 2)
+        return;
+    writeRegister8(MCP_OLATA + port, val);
 }
 
 /*! This is the 16-bit version of the writePort function.  This takes a single
