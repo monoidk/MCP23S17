@@ -230,37 +230,18 @@ void MCP23S17::digitalWrite(uint8_t pin, uint8_t value) {
     if (pin >= 16) {
         return;
     }
-    uint8_t dirReg = MCP_IODIRA;
-    uint8_t puReg = MCP_GPPUA;
-    uint8_t latReg = MCP_OLATA;
-    if (pin >= 8) {
-        pin -= 8;
-        dirReg = MCP_IODIRB;
-        puReg = MCP_GPPUB;
-        latReg = MCP_OLATB;
-    }
 
-    uint8_t mode = (_reg[dirReg] & (1<<pin)) == 0 ? OUTPUT : INPUT;
-    
-    switch (mode) {
-        case OUTPUT:
-            if (value == 0) {
-                _reg[latReg] &= ~(1<<pin);
-            } else {
-                _reg[latReg] |= (1<<pin);
-            }
-            writeRegister(latReg);
-            break;
+    uint16_t dir = getRegister16(MCP_IODIRA);
+    uint8_t mode = (dir & (1<<pin)) == 0 ? OUTPUT : INPUT;
+    uint8_t reg = (dir & (1<<pin)) == 0  ? MCP_OLATA : MCP_GPPUA;
 
-        case INPUT:
-            if (value == 0) {
-                _reg[puReg] &= ~(1<<pin);
-            } else {
-                _reg[puReg] |= (1<<pin);
-            }
-            writeRegister(puReg);
-            break;
+    uint16_t regval = getRegister16(reg);
+    if (value == 0) {
+        regval &= ~(1<<pin);
+    } else {
+        regval |= (1<<pin);
     }
+    writeRegister16(reg, regval);
 }
 
 void MCP23S17::enablePullup(uint8_t pin, bool enable) {
