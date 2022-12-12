@@ -276,6 +276,24 @@ void MCP23S17::digitalWrite(uint8_t pin, uint8_t value) {
             break;
     }
 }
+
+void MCP23S17::enablePullup(uint8_t pin, bool enable) {
+    if (pin >= 16) {
+        return;
+    }
+    uint8_t puReg = MCP_GPPUA;
+    if (pin >= 8) {
+        pin -= 8;
+        puReg = MCP_GPPUB;
+    }
+
+    if (enable) {
+        _reg[puReg] |= (1<<pin);
+    } else {
+        _reg[puReg] &= ~(1<<pin);
+    }
+    writeRegister(puReg);
+}
     
 /*! This will return the current state of a pin set to INPUT, or the last
  *  value written to a pin set to OUTPUT.
