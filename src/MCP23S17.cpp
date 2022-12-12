@@ -83,30 +83,54 @@ void MCP23S17::spi_end() {
     _spi->endTransaction();
 }
 
-/*! The begin function performs the initial configuration of the IO expander chip.
+/*! The begin_tree function performs the initial configuration of the IO expander chip.
  *  Not only does it set up the SPI communications, but it also configures the chip
  *  for address-based communication and sets the default parameters and registers
  *  to sensible values.
  *
  *  Example:
  *
- *      myExpander.begin();
+ *      myExpander.begin_tree();
  *
  */
-void MCP23S17::begin() {
+void MCP23S17::begin_tree() {
     // Should we be initializing SPI?
     // It is documented in doc, but seems inappropriate.
     _spi->begin();
     ::pinMode(_cs, OUTPUT);
     ::digitalWrite(_cs, HIGH);
     // first enable HAEN
-    uint8_t cmd = 0b01000000;
+    write_iocon_default();
+    writeAll();
+}
+
+void MCP23S17::write_iocon_default() {
     spi_begin();
+    uint8_t cmd = 0b01000000;
     _spi->transfer(cmd);
     _spi->transfer(MCP_IOCONA);
-    _spi->transfer(_reg[MCP_IOCONA]);
+    _spi->transfer(DEFAULT_IOCON);
     spi_end();
-    // then configure rest
+}
+
+/*! The begin_light function performs the initial configuration of the MCP IO expander chip only.
+ *  It configures the chip for address-based communication and sets the default parameters and registers,
+ *  optionally preserving GPIO output configuration - direction, pullup and output latches.
+ *
+ *  It does not configure SPI nor does it configure the CS pin, as the begin_full()
+ *
+ *  Example:
+ *
+ *      myExpander.begin_tree();
+ *
+ */
+void MCP23S17::begin_light(bool preserve_vals) {
+    write_iocon_default();
+    if (preserve_vals) {
+        readRegister(MCP_IODIRA, 2);
+        readRegister(MCP_GPPUA, 2);
+        readRegister(MCP_OLATA, 2);
+    }
     writeAll();
 }
 

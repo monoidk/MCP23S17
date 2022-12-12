@@ -104,6 +104,7 @@ class MCP23S17 {
         void writeRegister(uint8_t addr, uint8_t size = 1);
         void readAll();
         void writeAll();
+        void write_iocon_default();
     
         SPISettings spiSettings = SPISettings((uint32_t)8000000, MSBFIRST, SPI_MODE0);
 
@@ -111,7 +112,8 @@ class MCP23S17 {
         MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr);
         MCP23S17(_SPIClass &spi, uint8_t cs, uint8_t addr): MCP23S17(&spi, cs, addr) {};
 
-        void begin();
+        void begin_tree();
+        void begin_light(bool preserve_vals);
         void pinMode(uint8_t pin, uint8_t mode);
         void digitalWrite(uint8_t pin, uint8_t value);
         uint8_t digitalRead(uint8_t pin);
