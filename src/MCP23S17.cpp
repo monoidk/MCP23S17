@@ -371,37 +371,30 @@ void MCP23S17::enableInterrupt(uint8_t pin, uint8_t type) {
     if (pin >= 16) {
         return;
     }
-    uint8_t intcon = MCP_INTCONA;
-    uint8_t defval = MCP_DEFVALA;
-    uint8_t gpinten = MCP_GPINTENA;
-
-    if (pin >= 8) {
-        pin -= 8;
-        intcon = MCP_INTCONB;
-        defval = MCP_DEFVALB;
-        gpinten = MCP_GPINTENB;
-    }
+    uint16_t intcon = getRegister16(MCP_INTCONA);
+    uint16_t defval = getRegister16(MCP_DEFVALA);
+    uint16_t gpinten = getRegister16(MCP_GPINTENA);
 
     switch (type) {
         case CHANGE:
-            _reg[intcon] &= ~(1<<pin);
+            bitClear(intcon, pin);
             break;
         case RISING:
-            _reg[intcon] |= (1<<pin);
-            _reg[defval] &= ~(1<<pin);
+            bitSet(intcon, pin);
+            bitClear(defval, pin);
             break;
         case FALLING:
-            _reg[intcon] |= (1<<pin);
-            _reg[defval] |= (1<<pin);
+            bitSet(intcon, pin);
+            bitSet(defval, pin);
             break;
 
     }
 
-    _reg[gpinten] |= (1<<pin);
+    bitSet(gpinten, pin);
 
-    writeRegister(intcon);
-    writeRegister(defval);
-    writeRegister(gpinten);
+    writeRegister16(MCP_INTCONA, intcon);
+    writeRegister16(MCP_DEFVALA, defval);
+    writeRegister16(MCP_GPINTENA, gpinten);
 }
 
 /*! This disables the interrupt functionality of a pin.
@@ -414,15 +407,10 @@ void MCP23S17::disableInterrupt(uint8_t pin) {
     if (pin >= 16) {
         return;
     }
-    uint8_t gpinten = MCP_GPINTENA;
+    uint16_t gpinten = getRegister16(MCP_GPINTENA);
 
-    if (pin >= 8) {
-        pin -= 8;
-        gpinten = MCP_GPINTENB;
-    }
-
-    _reg[gpinten] &= ~(1<<pin);
-    writeRegister(gpinten);
+    bitClear(gpinten, pin);
+    writeRegister16(MCP_GPINTENA, gpinten);
 }
 
 /*! The two IO banks can have their INT pins connected together.
