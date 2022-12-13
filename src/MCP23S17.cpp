@@ -232,15 +232,11 @@ void MCP23S17::digitalWrite(uint8_t pin, uint8_t value) {
     }
 
     uint16_t dir = getRegister16(MCP_IODIRA);
-    uint8_t mode = (dir & (1<<pin)) == 0 ? OUTPUT : INPUT;
-    uint8_t reg = (dir & (1<<pin)) == 0  ? MCP_OLATA : MCP_GPPUA;
+    // mode: INPUT : OUTPUT  =>  set: pullup vs. output latch
+    uint8_t reg = bitRead(dir, pin) ? MCP_GPPUA : MCP_OLATA;
 
     uint16_t regval = getRegister16(reg);
-    if (value == 0) {
-        regval &= ~(1<<pin);
-    } else {
-        regval |= (1<<pin);
-    }
+    bitWrite(regval, pin, value);
     writeRegister16(reg, regval);
 }
 
@@ -249,11 +245,7 @@ void MCP23S17::enablePullup(uint8_t pin, bool enable) {
         return;
     }
     uint16_t pu = getRegister16(MCP_GPPUA);
-    if (enable) {
-        pu |= (1<<pin);
-    } else {
-        pu &= ~(1<<pin);
-    }
+    bitWrite(pu, pin, enable);
     writeRegister16(MCP_GPPUA, pu);
 }
 
@@ -276,8 +268,8 @@ void MCP23S17::setDir(uint8_t pin, uint8_t mode) {
     }
     uint16_t dir = getRegister16(MCP_IODIRA);
     switch (mode) {
-        case OUTPUT: dir &= ~(1<<pin); break;
-        case INPUT:  dir |= (1<<pin);  break;
+        case OUTPUT: bitClear(dir, pin); break;
+        case INPUT:  bitSet(dir, pin);  break;
         default: return;
     }
     writeRegister16(MCP_IODIRA, dir);
@@ -299,9 +291,9 @@ uint8_t MCP23S17::digitalRead(uint8_t pin) {
 
     switch (mode) {
         case OUTPUT:
-            return getRegister16(MCP_OLATA) & (1<<pin) ? HIGH : LOW;
+            return bitRead(getRegister16(MCP_OLATA), pin) ? HIGH : LOW;
         case INPUT:
-            return readRegister16(MCP_GPIOA) & (1<<pin) ? HIGH : LOW;
+            return bitRead(readRegister16(MCP_GPIOA), pin) ? HIGH : LOW;
     }
     return 0;
 }
