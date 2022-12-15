@@ -55,17 +55,17 @@ class MCP23S17 {
 #endif
 
         // MCP23XXX IOCON settings - initialized as 0 on POR
-        static const uint8_t IOCON_BANK   = 0b10000000;  // Split registers to two banks
-        static const uint8_t IOCON_MIRROR = 0b01000000;  // Mirror INT on both pins
-        static const uint8_t IOCON_SEQOP  = 0b00100000;  // Disable R/W sequential addressing
-        static const uint8_t IOCON_DISSLW = 0b00010000;  // Disable SDA slew rate control (I2C only)
-        static const uint8_t IOCON_HAEN   = 0b00001000;  // Use addressing from hardware address pins (vs. addr 0)
-        static const uint8_t IOCON_ODR    = 0b00000100;  // INT output is open-drain
-        static const uint8_t IOCON_INTPOL = 0b00000010;  // INT output pin active-high (vs. low), ignored if open-drain
-        static const uint8_t IOCON_INTCC  = 0b00000001;  // Interrupt cleared on reading INTCAP (not GPIO) register (MCP23XX8 only?)
+        static const uint8_t IOCON_BANK   = 7;  // Split registers to two banks
+        static const uint8_t IOCON_MIRROR = 6;  // Mirror INT on both pins
+        static const uint8_t IOCON_SEQOP  = 5;  // Disable R/W sequential addressing
+        static const uint8_t IOCON_DISSLW = 4;  // Disable SDA slew rate control (I2C only)
+        static const uint8_t IOCON_HAEN   = 3;  // Use addressing from hardware address pins (vs. addr 0)
+        static const uint8_t IOCON_ODR    = 2;  // INT output is open-drain
+        static const uint8_t IOCON_INTPOL = 1;  // INT output pin active-high (vs. low), ignored if open-drain
+        static const uint8_t IOCON_INTCC  = 0;  // Interrupt cleared on reading INTCAP (not GPIO) register (MCP23XX8 only?)
 
         // default IOCON settings for MCP23S17
-        static const uint8_t DEFAULT_IOCON = IOCON_DISSLW | IOCON_HAEN;
+        static const uint8_t DEFAULT_IOCON = (1 << IOCON_DISSLW) | (1 << IOCON_HAEN);
 
     private:
         _SPIClass *_spi; /*! This points to a valid SPI object */
