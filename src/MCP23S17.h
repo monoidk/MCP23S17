@@ -67,7 +67,8 @@ class MCP23S17 {
         static const uint8_t IOCON_INTCC  = 0;  // Interrupt cleared on reading INTCAP (not GPIO) register (MCP23XX8 only?)
 
         // default IOCON settings for MCP23S17
-        static const uint8_t DEFAULT_IOCON = (1 << IOCON_DISSLW) | (1 << IOCON_HAEN);
+        static const uint8_t DEFAULT_IOCON_SINGLE = (1 << IOCON_DISSLW) | (1 << IOCON_HAEN);
+        static const uint16_t DEFAULT_IOCON_FULL = (((uint16_t) DEFAULT_IOCON_SINGLE) << 8) || DEFAULT_IOCON_SINGLE;
 
     private:
         _SPIClass *_spi; /*! This points to a valid SPI object */
@@ -75,38 +76,48 @@ class MCP23S17 {
         uint8_t _chip_addr;  /*! 3-bit chip address */
 
         enum {
-            MCP_IODIRA,     MCP_IODIRB,
-            MCP_IPOLA,      MCP_IPOLB,
-            MCP_GPINTENA,   MCP_GPINTENB,
-            MCP_DEFVALA,    MCP_DEFVALB,
-            MCP_INTCONA,    MCP_INTCONB,
-            MCP_IOCONA,     MCP_IOCONB,
-            MCP_GPPUA,      MCP_GPPUB,
-            MCP_INTFA,      MCP_INTFB,
-            MCP_INTCAPA,    MCP_INTCAPB,
-            MCP_GPIOA,      MCP_GPIOB,
-            MCP_OLATA,      MCP_OLATB,
+            MCP_IODIR,
+            MCP_IPOL,
+            MCP_GPINTEN,
+            MCP_DEFVAL,
+            MCP_INTCON,
+            MCP_IOCON,
+            MCP_GPPU,
+            MCP_INTF,
+            MCP_INTCAP,
+            MCP_GPIO,
+            MCP_OLAT,
             MCP_REG_COUNT
         };
 
-        uint8_t _reg[MCP_REG_COUNT];   /*! Local mirrors of the 22 internal registers of the MCP23S17 chip */
+        unit_t _reg[MCP_REG_COUNT];   /*! Local mirrors of the 22 internal registers of the MCP23S17 chip, little-endian */
 
         void spi_begin();
         void spi_end();
 
-        void readRegister(uint8_t addr, uint8_t size = 1);
+        uint8_t get_byte(unit_t data, uint8_t offset) { return (data >> offset) & 0xff; }
+        void set_byte(unit_t & data, uint8_t offset, uint8_t byte) {
+            unit_t mask = ~((unit_t) 0xff << offset);
+            data = (data & mask) | ((unit_t) byte << offset);
+        }
+
+        void readRegisters(uint8_t addr, uint8_t size = 1);
         /* Get cached value of register (1 byte) */
-        uint8_t getRegister8(uint8_t addr) { return _reg[addr]; }
+        uint8_t getRegister8(uint8_t addr, uint8_t offset) { return get_byte(_reg[addr], offset); }
+        /* Get cached value of register (little-endian) */
+        unit_t getRegister(uint8_t addr) { return _reg[addr]; }
         /* Read register and return value (1 byte) */
-        uint8_t readRegister8(uint8_t addr) { readRegister(addr, 1); return getRegister8(addr); }
-        /* Get cached value of register (2 bytes, little-endian) */
-        uint16_t getRegister16(uint8_t addr) { return (((uint16_t) _reg[addr + 1]) << 8) | _reg[addr]; }
-        /* Read register and return value (2 bytes, little-endian) */
-        uint16_t readRegister16(uint8_t addr) { readRegister(addr, 2); return getRegister16(addr); }
-        void writeRegister(uint8_t addr, uint8_t size = 1);
-        void writeRegister8(uint8_t addr, uint8_t val) { _reg[addr] = val; writeRegister(addr, 1); }
-        void writeRegister16(uint8_t addr, uint16_t val) {
-            _reg[addr] = val & 0xff; _reg[addr + 1] = val >> 8; writeRegister(addr, 2);
+        uint8_t readRegister8(uint8_t addr, uint8_t offset);
+        /* Read register and return value (little-endian) */
+        unit_t readRegister(uint8_t addr) { readRegisters(addr, 1); return getRegister(addr); }
+        void writeRegisters(uint8_t addr, uint8_t size = 1);
+        void writeRegister8(uint8_t addr, uint8_t offset, uint8_t val) {
+            set_byte(_reg[addr], offset, val);
+            writeRegisterOnly8(addr, offset);
+        }
+        void writeRegisterOnly8(uint8_t addr, uint8_t offset);
+        void writeRegister(uint8_t addr, unit_t val) {
+            _reg[addr] = val; writeRegisters(addr, 1);
         }
         void readAll();
         void writeAll();
@@ -125,25 +136,24 @@ class MCP23S17 {
         uint8_t digitalRead(uint8_t pin);
 
         uint8_t readPort(uint8_t port);
-        uint16_t readPort();
+        unit_t readPort();
         void writePort(uint8_t port, uint8_t val);
         void writePort(uint16_t val);
         void enableInterrupt(uint8_t pin, uint8_t type);
         void disableInterrupt(uint8_t pin);
         void setMirror(bool m);
-        uint16_t getInterruptPins();
-        uint16_t getInterruptValue();
+        unit_t getInterruptPins();
+        uint8_t getInterruptPins(uint8_t port);
+        unit_t getInterruptValue();
+        uint8_t getInterruptValue(uint8_t port);
         void setInterruptLevel(uint8_t level);
         void setInterruptOD(bool openDrain);
-        uint8_t getInterruptAPins();
-        uint8_t getInterruptAValue();
-        uint8_t getInterruptBPins();
-        uint8_t getInterruptBValue();
 
         void setDir(uint8_t pin, uint8_t mode);
-        uint16_t getDirsInput() { return getRegister16(MCP_IODIRA); }
+        unit_t getDirsInput() { return getRegister(MCP_IODIR); }
+        unit_t readDirsInput() { return getRegister(MCP_IODIR); }
         void enablePullup(uint8_t pin, bool enable);
         bool getEnabledPullup(uint8_t pin) { return !!bitRead(getEnabledPullups(), pin); }
-        uint16_t getEnabledPullups() { return getRegister16(MCP_GPPUA); }
+        unit_t getEnabledPullups() { return getRegister(MCP_GPPU); }
 };
 #endif

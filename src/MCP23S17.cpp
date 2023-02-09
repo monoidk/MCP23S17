@@ -49,28 +49,17 @@ MCP23S17::MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr) {
     _cs = cs;
     _chip_addr = addr;
 
-    _reg[MCP_IODIRA] = 0xFF;
-    _reg[MCP_IODIRB] = 0xFF;
-    _reg[MCP_IPOLA] = 0x00;
-    _reg[MCP_IPOLB] = 0x00;
-    _reg[MCP_GPINTENA] = 0x00;
-    _reg[MCP_GPINTENB] = 0x00;
-    _reg[MCP_DEFVALA] = 0x00;
-    _reg[MCP_DEFVALB] = 0x00;
-    _reg[MCP_INTCONA] = 0x00;
-    _reg[MCP_INTCONB] = 0x00;
-    _reg[MCP_IOCONA] = DEFAULT_IOCON;
-    _reg[MCP_IOCONB] = DEFAULT_IOCON;
-    _reg[MCP_GPPUA] = 0x00;
-    _reg[MCP_GPPUB] = 0x00;
-    _reg[MCP_INTFA] = 0x00;
-    _reg[MCP_INTFB] = 0x00;
-    _reg[MCP_INTCAPA] = 0x00;
-    _reg[MCP_INTCAPB] = 0x00;
-    _reg[MCP_GPIOA] = 0x00;
-    _reg[MCP_GPIOB] = 0x00;
-    _reg[MCP_OLATA] = 0x00;
-    _reg[MCP_OLATB] = 0x00;
+    _reg[MCP_IODIR] = (unit_t) -1;
+    _reg[MCP_IPOL] = 0x0000;
+    _reg[MCP_GPINTEN] = 0x0000;
+    _reg[MCP_DEFVAL] = 0x0000;
+    _reg[MCP_INTCON] = 0x0000;
+    _reg[MCP_IOCON] = DEFAULT_IOCON_FULL;
+    _reg[MCP_GPPU] = 0x0000;
+    _reg[MCP_INTF] = 0x0000;
+    _reg[MCP_INTCAP] = 0x0000;
+    _reg[MCP_GPIO] = 0x0000;
+    _reg[MCP_OLAT] = 0x0000;
 }
 
 void MCP23S17::spi_begin() {
@@ -108,8 +97,8 @@ void MCP23S17::write_iocon_default() {
     spi_begin();
     uint8_t cmd = 0b01000000;
     _spi->transfer(cmd);
-    _spi->transfer(MCP_IOCONA);
-    _spi->transfer(DEFAULT_IOCON);
+    _spi->transfer(MCP_IOCON * sizeof(unit_t));
+    _spi->transfer(DEFAULT_IOCON_SINGLE);
     spi_end();
 }
 
@@ -127,44 +116,92 @@ void MCP23S17::write_iocon_default() {
 void MCP23S17::begin_light(bool preserve_vals) {
     write_iocon_default();
     if (preserve_vals) {
-        readRegister(MCP_IODIRA, 2);
-        readRegister(MCP_GPPUA, 2);
-        readRegister(MCP_OLATA, 2);
+        readRegister(MCP_IODIR);
+        readRegister(MCP_GPPU);
+        readRegister(MCP_OLAT);
     }
     writeAll();
 }
 
-/*! This private function reads a value from the specified register on the chip and
- *  stores it in the _reg array for later usage.
+/*! This private function reads from the register array on the chip
+ * a number of unit-size values, and stores them in the _reg array for later usage.
  */
-void MCP23S17::readRegister(uint8_t addr, uint8_t size) {
+void MCP23S17::readRegisters(uint8_t addr, uint8_t size) {
     if ((uint32_t) addr + size > MCP_REG_COUNT) {
         return;
     }
     uint8_t cmd = 0b01000001 | ((_chip_addr & 0b111) << 1);
     spi_begin();
     _spi->transfer(cmd);
-    _spi->transfer(addr);
+    _spi->transfer(addr * sizeof(unit_t));
     for (uint32_t i = 0; i < size; ++i) {
-        _reg[addr++] = _spi->transfer(0xFF);
+        unit_t reg = 0;
+        for (uint32_t j = 0; j < sizeof reg; ++j) {
+            uint8_t byte = _spi->transfer(0xFF);
+            reg = reg | (byte << (8 * j));
+        }
+        _reg[addr++] = reg;
     }
     spi_end();
 }
 
-/*! This private function writes the current value of a register (as stored in the
- *  _reg array) out to the register in the chip.
+/*! This private function reads a byte-size value from the specified register on the chip and
+ *  stores it in the _reg array for later usage.
  */
-void MCP23S17::writeRegister(uint8_t addr, uint8_t size) {
+uint8_t MCP23S17::readRegister8(uint8_t addr, uint8_t offset) {
+    if ((uint32_t) addr > MCP_REG_COUNT) {
+        return -1;
+    }
+    if (offset >= sizeof (unit_t)) {
+        return -1;
+    }
+    uint8_t cmd = 0b01000001 | ((_chip_addr & 0b111) << 1);
+    spi_begin();
+    _spi->transfer(cmd);
+    _spi->transfer(addr * sizeof(unit_t) + offset);
+    uint8_t byte = _spi->transfer(0xFF);
+    set_byte(_reg[addr], offset, byte);
+    spi_end();
+    return byte;
+}
+
+/*! This private function writes the current value of a unit-size register
+ * (as stored in the _reg array) out to the register in the chip.
+ */
+void MCP23S17::writeRegisters(uint8_t addr, uint8_t size) {
     if ((uint32_t) addr + size > MCP_REG_COUNT) {
         return;
     }
     uint8_t cmd = 0b01000000 | ((_chip_addr & 0b111) << 1);
     spi_begin();
     _spi->transfer(cmd);
-    _spi->transfer(addr);
+    _spi->transfer(addr * sizeof(unit_t));
     for (uint32_t i = 0; i < size; ++i) {
-        _spi->transfer(_reg[addr++]);
+        unit_t reg = _reg[addr++];
+        for (uint32_t j = 0; j < sizeof(reg); ++j) {
+            _spi->transfer(reg & 0xff);
+            reg = reg >> 8;
+        }
     }
+    spi_end();
+}
+
+/*! This private function writes the current value of a byte-size register
+ * (as stored in the _reg array) out to the register in the chip.
+ */
+void MCP23S17::writeRegisterOnly8(uint8_t addr, uint8_t offset) {
+    if ((uint32_t) addr > MCP_REG_COUNT) {
+        return;
+    }
+    if (offset >= sizeof(unit_t)) {
+        return;
+    }
+    uint8_t cmd = 0b01000000 | ((_chip_addr & 0b111) << 1);
+    spi_begin();
+    _spi->transfer(cmd);
+    _spi->transfer(addr * sizeof(unit_t) + offset);
+    uint8_t byte = get_byte(_reg[addr], offset);
+    _spi->transfer(byte);
     spi_end();
 }
 
@@ -172,7 +209,7 @@ void MCP23S17::writeRegister(uint8_t addr, uint8_t size) {
  *  ensure the _reg array contains all the correct current values.
  */
 void MCP23S17::readAll() {
-    readRegister(0, MCP_REG_COUNT);
+    readRegisters(0, MCP_REG_COUNT);
 }
 
 /*! This private function performs a bulk write of all the data in the _reg array
@@ -180,7 +217,7 @@ void MCP23S17::readAll() {
  *  of the chip.
  */
 void MCP23S17::writeAll() {
-    writeRegister(0, MCP_REG_COUNT);
+    writeRegisters(0, MCP_REG_COUNT);
 }
 
 /*! Just like the pinMode() function of the Arduino API, this function sets the
@@ -231,22 +268,22 @@ void MCP23S17::digitalWrite(uint8_t pin, uint8_t value) {
         return;
     }
 
-    uint16_t dir = getRegister16(MCP_IODIRA);
+    unit_t dir = getRegister(MCP_IODIR);
     // mode: INPUT : OUTPUT  =>  set: pullup vs. output latch
-    uint8_t reg = bitRead(dir, pin) ? MCP_GPPUA : MCP_OLATA;
+    uint8_t reg = bitRead(dir, pin) ? MCP_GPPU : MCP_OLAT;
 
-    uint16_t regval = getRegister16(reg);
+    unit_t regval = getRegister(reg);
     bitWrite(regval, pin, value);
-    writeRegister16(reg, regval);
+    writeRegister(reg, regval);
 }
 
 void MCP23S17::enablePullup(uint8_t pin, bool enable) {
     if (pin >= PIN_COUNT) {
         return;
     }
-    uint16_t pu = getRegister16(MCP_GPPUA);
+    unit_t pu = getRegister(MCP_GPPU);
     bitWrite(pu, pin, enable);
-    writeRegister16(MCP_GPPUA, pu);
+    writeRegister(MCP_GPPU, pu);
 }
 
 /*! Set pin direction as INPUT or OUTPUT.
@@ -266,13 +303,13 @@ void MCP23S17::setDir(uint8_t pin, uint8_t mode) {
     if (pin >= PIN_COUNT) {
         return;
     }
-    uint16_t dir = getRegister16(MCP_IODIRA);
+    uint16_t dir = getRegister(MCP_IODIR);
     switch (mode) {
         case OUTPUT: bitClear(dir, pin); break;
         case INPUT:  bitSet(dir, pin);  break;
         default: return;
     }
-    writeRegister16(MCP_IODIRA, dir);
+    writeRegister(MCP_IODIR, dir);
 }
 
 /*! This will return the current state of a pin set to INPUT, or the last
@@ -287,13 +324,13 @@ uint8_t MCP23S17::digitalRead(uint8_t pin) {
         return 0;
     }
 
-    uint8_t mode = (getRegister16(MCP_IODIRA) & (1<<pin)) == 0 ? OUTPUT : INPUT;
+    uint8_t mode = (getRegister(MCP_IODIR) & (1<<pin)) == 0 ? OUTPUT : INPUT;
 
     switch (mode) {
         case OUTPUT:
-            return bitRead(getRegister16(MCP_OLATA), pin) ? HIGH : LOW;
+            return bitRead(getRegister(MCP_OLAT), pin) ? HIGH : LOW;
         case INPUT:
-            return bitRead(readRegister16(MCP_GPIOA), pin) ? HIGH : LOW;
+            return bitRead(readRegister(MCP_GPIO), pin) ? HIGH : LOW;
     }
     return 0;
 }
@@ -311,25 +348,24 @@ uint8_t MCP23S17::readPort(uint8_t port) {
     if (port >= sizeof(unit_t)) {
         return -1;
     }
-    return readRegister8(MCP_GPIOA + port);
+    return readRegister8(MCP_GPIO, port);
 }
 
-/*! This is a full 16-bit version of the parameterised readPort function.  This
- *  version reads the value of both ports and combines them into a single 16-bit
- *  value.
+/*! This is a full version of the parameterised readPort function.  This
+ *  version reads the value of all ports, combining them into a single value.
  *
  *  Example:
  *
  *      unsigned int value = myExpander.readPort();
  */
-uint16_t MCP23S17::readPort() {
-    return readRegister16(MCP_GPIOA);
+MCP23S17::unit_t MCP23S17::readPort() {
+    return readRegister(MCP_GPIO);
 }
 
-/*! This writes an 8-bit value to one of the two IO port banks (A/B) on the chip.
+/*! This writes an 8-bit value to one of the IO port banks on the chip.
  *  The value is output direct to any pins on that bank that are set as OUTPUT. Any
  *  bits that correspond to pins set to INPUT are ignored.  As with the readPort
- *  function the first parameter defines which bank to use (0 = A, 1+ = B).
+ *  function the first parameter defines which bank to use (0 = A, 1 = B, ..).
  *
  *  Example:
  *
@@ -338,7 +374,7 @@ uint16_t MCP23S17::readPort() {
 void MCP23S17::writePort(uint8_t port, uint8_t val) {
     if (port >= sizeof(unit_t))
         return;
-    writeRegister8(MCP_OLATA + port, val);
+    writeRegister8(MCP_OLAT, port, val);
 }
 
 /*! This is the 16-bit version of the writePort function.  This takes a single
@@ -350,7 +386,7 @@ void MCP23S17::writePort(uint8_t port, uint8_t val) {
  *      myExpander.writePort(0x55AA);
  */
 void MCP23S17::writePort(uint16_t val) {
-    writeRegister16(MCP_OLATA, val);
+    writeRegister(MCP_OLAT, val);
 }
 
 /*! This enables the interrupt functionality of a pin.  The interrupt type can be one of:
@@ -371,9 +407,9 @@ void MCP23S17::enableInterrupt(uint8_t pin, uint8_t type) {
     if (pin >= PIN_COUNT) {
         return;
     }
-    uint16_t intcon = getRegister16(MCP_INTCONA);
-    uint16_t defval = getRegister16(MCP_DEFVALA);
-    uint16_t gpinten = getRegister16(MCP_GPINTENA);
+    uint16_t intcon = getRegister(MCP_INTCON);
+    uint16_t defval = getRegister(MCP_DEFVAL);
+    uint16_t gpinten = getRegister(MCP_GPINTEN);
 
     switch (type) {
         case CHANGE:
@@ -387,14 +423,13 @@ void MCP23S17::enableInterrupt(uint8_t pin, uint8_t type) {
             bitSet(intcon, pin);
             bitSet(defval, pin);
             break;
-
     }
 
     bitSet(gpinten, pin);
 
-    writeRegister16(MCP_INTCONA, intcon);
-    writeRegister16(MCP_DEFVALA, defval);
-    writeRegister16(MCP_GPINTENA, gpinten);
+    writeRegister(MCP_INTCON, intcon);
+    writeRegister(MCP_DEFVAL, defval);
+    writeRegister(MCP_GPINTEN, gpinten);
 }
 
 /*! This disables the interrupt functionality of a pin.
@@ -407,10 +442,10 @@ void MCP23S17::disableInterrupt(uint8_t pin) {
     if (pin >= PIN_COUNT) {
         return;
     }
-    uint16_t gpinten = getRegister16(MCP_GPINTENA);
+    uint16_t gpinten = getRegister(MCP_GPINTEN);
 
     bitClear(gpinten, pin);
-    writeRegister16(MCP_GPINTENA, gpinten);
+    writeRegister(MCP_GPINTEN, gpinten);
 }
 
 /*! The two IO banks can have their INT pins connected together.
@@ -425,13 +460,13 @@ void MCP23S17::disableInterrupt(uint8_t pin) {
  */
 void MCP23S17::setMirror(bool m) {
     if (m) {
-        bitSet(_reg[MCP_IOCONA], IOCON_MIRROR);
-        bitSet(_reg[MCP_IOCONB], IOCON_MIRROR);
+        bitSet(_reg[MCP_IOCON], IOCON_MIRROR);
+        bitSet(_reg[MCP_IOCON], IOCON_MIRROR + 8);
     } else {
-        bitClear(_reg[MCP_IOCONA], IOCON_MIRROR);
-        bitClear(_reg[MCP_IOCONB], IOCON_MIRROR);
+        bitClear(_reg[MCP_IOCON], IOCON_MIRROR);
+        bitClear(_reg[MCP_IOCON], IOCON_MIRROR + 8);
     }
-    writeRegister(MCP_IOCONA);
+    writeRegisters(MCP_IOCON);
 }
 
 /*! This function returns a 16-bit bitmap of the the pin or pins that have cause an interrupt to fire.
@@ -440,8 +475,18 @@ void MCP23S17::setMirror(bool m) {
  *
  *      unsigned int pins = myExpander.getInterruptPins();
  */
-uint16_t MCP23S17::getInterruptPins() {
-    return readRegister16(MCP_INTFA);
+MCP23S17::unit_t MCP23S17::getInterruptPins() {
+    return readRegister(MCP_INTF);
+}
+
+/*! This function returns an 8-bit bitmap of the given port pins that have caused an interrupt to fire.
+ *
+ *  Example:
+ *
+ *      unsigned int pins = myExpander.getInterruptPins(0);
+ */
+uint8_t MCP23S17::getInterruptPins(uint8_t port) {
+    return readRegister8(MCP_INTF, port);
 }
 
 /*! This returns a snapshot of the IO pin states at the moment the last interrupt occured.  Reading
@@ -453,8 +498,24 @@ uint16_t MCP23S17::getInterruptPins() {
  *
  *      unsigned int pinValues = myExpander.getInterruptValue();
  */
-uint16_t MCP23S17::getInterruptValue() {
-    return readRegister16(MCP_INTCAPA);
+MCP23S17::unit_t MCP23S17::getInterruptValue() {
+    return readRegister(MCP_INTCAP);
+}
+
+/*! This returns a snapshot of the given port pin states at the moment the last interrupt occured.
+ *
+ *  Reading this getInterruptValue (MCP_INTCAP) or readPort (MCP_GPIO) clears the interrupt status
+ *  (and hence INT pins) for the port, depending on IOCON_INTCC setting and its support on given
+ *  device type. Iff IOCON_INTCC is not supported, both reads clear the interrupt.
+ *
+ *  Until the interrupt is cleared, no further interrupts can be indicated (on the given port?).
+ *
+ *  Example:
+ *
+ *      unsigned int pinValues = myExpander.getInterruptValue(0);
+ */
+uint8_t MCP23S17::getInterruptValue(uint8_t port) {
+    return readRegister8(MCP_INTCAP, port);
 }
 
 /*! This sets the "active" level for an interrupt.  HIGH means the interrupt pin
@@ -466,13 +527,13 @@ uint16_t MCP23S17::getInterruptValue() {
  */
 void MCP23S17::setInterruptLevel(uint8_t level) {
     if (level == LOW) {
-        bitClear(_reg[MCP_IOCONA], IOCON_INTPOL);
-        bitClear(_reg[MCP_IOCONB], IOCON_INTPOL);
+        bitClear(_reg[MCP_IOCON], IOCON_INTPOL);
+        bitClear(_reg[MCP_IOCON], IOCON_INTPOL + 8);
     } else {
-        bitSet(_reg[MCP_IOCONA], IOCON_INTPOL);
-        bitSet(_reg[MCP_IOCONB], IOCON_INTPOL);
+        bitSet(_reg[MCP_IOCON], IOCON_INTPOL);
+        bitSet(_reg[MCP_IOCON], IOCON_INTPOL + 8);
     }
-    writeRegister(MCP_IOCONA);
+    writeRegisters(MCP_IOCON, 1);
 }
 
 /*! Using this function it is possible to configure the interrupt output pins to be open
@@ -486,63 +547,11 @@ void MCP23S17::setInterruptLevel(uint8_t level) {
  */
 void MCP23S17::setInterruptOD(bool openDrain) {
     if (openDrain) {
-        bitSet(_reg[MCP_IOCONA], IOCON_ODR);
-        bitSet(_reg[MCP_IOCONB], IOCON_ODR);
+        bitSet(_reg[MCP_IOCON], IOCON_ODR);
+        bitSet(_reg[MCP_IOCON], IOCON_ODR + 8);
     } else {
-        bitClear(_reg[MCP_IOCONA], IOCON_ODR);
-        bitClear(_reg[MCP_IOCONB], IOCON_ODR);
+        bitClear(_reg[MCP_IOCON], IOCON_ODR);
+        bitClear(_reg[MCP_IOCON], IOCON_ODR + 8);
     }
-    writeRegister(MCP_IOCONA);
-}
-
-/*! This function returns an 8-bit bitmap of the Port-A pin or pins that have caused an interrupt to fire.
- *
- *  Example:
- *
- *      unsigned int pins = myExpander.getInterruptAPins();
- */
-uint8_t MCP23S17::getInterruptAPins() {
-    return readRegister8(MCP_INTFA);
-}
-
-/*! This returns a snapshot of the Port-A IO pin states at the moment the last interrupt occured.
- *
- *  Reading this getInterruptValue (MCP_INTCAP) or readPort (MCP_GPIO) clears the interrupt status
- *  (and hence INT pins) for the port, depending on IOCON_INTCC setting and its support on given
- *  device type. Iff IOCON_INTCC is not supported, both reads clear the interrupt.
- *
- *  Until the interrupt is cleared, no further interrupts can be indicated (on the given port?).
- *
- *  Example:
- *
- *      unsigned int pinValues = myExpander.getInterruptAValue();
- */
-uint8_t MCP23S17::getInterruptAValue() {
-    return readRegister8(MCP_INTCAPA);
-}
-
-/*! This function returns an 8-bit bitmap of the Port-B pin or pins that have caused an interrupt to fire.
- *
- *  Example:
- *
- *      unsigned int pins = myExpander.getInterruptBPins();
- */
-uint8_t MCP23S17::getInterruptBPins() {
-    return readRegister8(MCP_INTFB);
-}
-
-/*! This returns a snapshot of the Port-B IO pin states at the moment the last interrupt occured.
- *
- *  Reading this getInterruptValue (MCP_INTCAP) or readPort (MCP_GPIO) clears the interrupt status
- *  (and hence INT pins) for the port, depending on IOCON_INTCC setting and its support on given
- *  device type. Iff IOCON_INTCC is not supported, both reads clear the interrupt.
- *
- *  Until the interrupt is cleared, no further interrupts can be indicated (on the given port?).
- *
- *  Example:
- *
- *      unsigned int pinValues = myExpander.getInterruptBValue();
- */
-uint8_t MCP23S17::getInterruptBValue() {
-    return readRegister8(MCP_INTCAPB);
+    writeRegisters(MCP_IOCON, 1);
 }
