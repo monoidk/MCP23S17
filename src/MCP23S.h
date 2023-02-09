@@ -1,5 +1,6 @@
 /*
- * Copyright (c) , Majenko Technologies
+ * Copyright (c) 2014-2021, Majenko Technologies
+ *               2022-2023, Ivan Labáth
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
