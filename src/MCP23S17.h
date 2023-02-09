@@ -53,6 +53,8 @@ class MCP23S17 {
         /*! SPI object created from the Arduino compatible SPI library. */
         typedef SPIClass _SPIClass;
 #endif
+        typedef uint16_t unit_t;
+        const uint8_t PIN_COUNT = sizeof(unit_t) * 8;
 
         // MCP23XXX IOCON settings - initialized as 0 on POR
         static const uint8_t IOCON_BANK   = 7;  // Split registers to two banks

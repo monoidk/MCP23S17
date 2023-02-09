@@ -199,7 +199,7 @@ void MCP23S17::writeAll() {
  *      myExpander.pinMode(5, INPUT_PULLUP);
  */
 void MCP23S17::pinMode(uint8_t pin, uint8_t mode) {
-    if (pin >= 16) {
+    if (pin >= PIN_COUNT) {
         return;
     }
     switch (mode) {
@@ -227,7 +227,7 @@ void MCP23S17::pinMode(uint8_t pin, uint8_t mode) {
  *      myExpander.digitalWrite(3, HIGH);
  */
 void MCP23S17::digitalWrite(uint8_t pin, uint8_t value) {
-    if (pin >= 16) {
+    if (pin >= PIN_COUNT) {
         return;
     }
 
@@ -241,7 +241,7 @@ void MCP23S17::digitalWrite(uint8_t pin, uint8_t value) {
 }
 
 void MCP23S17::enablePullup(uint8_t pin, bool enable) {
-    if (pin >= 16) {
+    if (pin >= PIN_COUNT) {
         return;
     }
     uint16_t pu = getRegister16(MCP_GPPUA);
@@ -263,7 +263,7 @@ void MCP23S17::enablePullup(uint8_t pin, bool enable) {
  *      myExpander.setDir(5, INPUT);
  */
 void MCP23S17::setDir(uint8_t pin, uint8_t mode) {
-    if (pin >= 16) {
+    if (pin >= PIN_COUNT) {
         return;
     }
     uint16_t dir = getRegister16(MCP_IODIRA);
@@ -283,7 +283,7 @@ void MCP23S17::setDir(uint8_t pin, uint8_t mode) {
  *      byte value = myExpander.digitalRead(4);
  */
 uint8_t MCP23S17::digitalRead(uint8_t pin) {
-    if (pin >= 16) {
+    if (pin >= PIN_COUNT) {
         return 0;
     }
 
@@ -308,7 +308,7 @@ uint8_t MCP23S17::digitalRead(uint8_t pin) {
  *      byte portA = myExpander.readPort(0);
  */
 uint8_t MCP23S17::readPort(uint8_t port) {
-    if (port >= 2) {
+    if (port >= sizeof(unit_t)) {
         return -1;
     }
     return readRegister8(MCP_GPIOA + port);
@@ -336,7 +336,7 @@ uint16_t MCP23S17::readPort() {
  *      myExpander.writePort(0, 0x55);
  */
 void MCP23S17::writePort(uint8_t port, uint8_t val) {
-    if (port >= 2)
+    if (port >= sizeof(unit_t))
         return;
     writeRegister8(MCP_OLATA + port, val);
 }
@@ -368,7 +368,7 @@ void MCP23S17::writePort(uint16_t val) {
  *      myExpander.enableInterrupt(4, RISING);
  */
 void MCP23S17::enableInterrupt(uint8_t pin, uint8_t type) {
-    if (pin >= 16) {
+    if (pin >= PIN_COUNT) {
         return;
     }
     uint16_t intcon = getRegister16(MCP_INTCONA);
@@ -404,7 +404,7 @@ void MCP23S17::enableInterrupt(uint8_t pin, uint8_t type) {
  *      myExpander.disableInterrupt(4);
  */
 void MCP23S17::disableInterrupt(uint8_t pin) {
-    if (pin >= 16) {
+    if (pin >= PIN_COUNT) {
         return;
     }
     uint16_t gpinten = getRegister16(MCP_GPINTENA);
