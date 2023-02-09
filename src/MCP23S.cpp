@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <MCP23S17.h>
+#include <MCP23S.h>
 
 /*! The constructor takes three parameters.  The first is an SPI class
  *  pointer.  This is the address of an SPI object (either the default

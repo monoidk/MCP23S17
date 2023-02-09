@@ -29,8 +29,8 @@
  */
 
 
-#ifndef _MCP23S17_H
-#define _MCP23S17_H
+#ifndef _MCP23S_H
+#define _MCP23S_H
 
 #if (ARDUINO >= 100)
 # include <Arduino.h>
