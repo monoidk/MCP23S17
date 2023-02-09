@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2014-2021, Majenko Technologies
- *               2022, Ivan Labáth
+ *               2022-2023, Ivan Labáth
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -44,7 +44,8 @@
  *      MCP23S17 myExpander(&SPI, 10, 0);
  *
  */
-MCP23S17::MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr) {
+template <typename UNIT>
+MCP23S<UNIT>::MCP23S(_SPIClass *spi, uint8_t cs, uint8_t addr) {
     _spi = spi;
     _cs = cs;
     _chip_addr = addr;
@@ -62,12 +63,14 @@ MCP23S17::MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr) {
     _reg[MCP_OLAT] = 0x0000;
 }
 
-void MCP23S17::spi_begin() {
+template <typename UNIT>
+void MCP23S<UNIT>::spi_begin() {
     _spi->beginTransaction(spiSettings);
     ::digitalWrite(_cs, LOW);
 }
 
-void MCP23S17::spi_end() {
+template <typename UNIT>
+void MCP23S<UNIT>::spi_end() {
     ::digitalWrite(_cs, HIGH);
     _spi->endTransaction();
 }
@@ -82,7 +85,8 @@ void MCP23S17::spi_end() {
  *      myExpander.begin_tree();
  *
  */
-void MCP23S17::begin_tree() {
+template <typename UNIT>
+void MCP23S<UNIT>::begin_tree() {
     // Should we be initializing SPI?
     // It is documented in doc, but seems inappropriate.
     _spi->begin();
@@ -93,7 +97,8 @@ void MCP23S17::begin_tree() {
     writeAll();
 }
 
-void MCP23S17::write_iocon_default() {
+template <typename UNIT>
+void MCP23S<UNIT>::write_iocon_default() {
     spi_begin();
     uint8_t cmd = 0b01000000;
     _spi->transfer(cmd);
@@ -113,7 +118,8 @@ void MCP23S17::write_iocon_default() {
  *      myExpander.begin_tree();
  *
  */
-void MCP23S17::begin_light(bool preserve_vals) {
+template <typename UNIT>
+void MCP23S<UNIT>::begin_light(bool preserve_vals) {
     write_iocon_default();
     if (preserve_vals) {
         readRegister(MCP_IODIR);
@@ -126,7 +132,8 @@ void MCP23S17::begin_light(bool preserve_vals) {
 /*! This private function reads from the register array on the chip
  * a number of unit-size values, and stores them in the _reg array for later usage.
  */
-void MCP23S17::readRegisters(uint8_t addr, uint8_t size) {
+template <typename UNIT>
+void MCP23S<UNIT>::readRegisters(uint8_t addr, uint8_t size) {
     if ((uint32_t) addr + size > MCP_REG_COUNT) {
         return;
     }
@@ -148,7 +155,8 @@ void MCP23S17::readRegisters(uint8_t addr, uint8_t size) {
 /*! This private function reads a byte-size value from the specified register on the chip and
  *  stores it in the _reg array for later usage.
  */
-uint8_t MCP23S17::readRegister8(uint8_t addr, uint8_t offset) {
+template <typename UNIT>
+uint8_t MCP23S<UNIT>::readRegister8(uint8_t addr, uint8_t offset) {
     if ((uint32_t) addr > MCP_REG_COUNT) {
         return -1;
     }
@@ -168,7 +176,8 @@ uint8_t MCP23S17::readRegister8(uint8_t addr, uint8_t offset) {
 /*! This private function writes the current value of a unit-size register
  * (as stored in the _reg array) out to the register in the chip.
  */
-void MCP23S17::writeRegisters(uint8_t addr, uint8_t size) {
+template <typename UNIT>
+void MCP23S<UNIT>::writeRegisters(uint8_t addr, uint8_t size) {
     if ((uint32_t) addr + size > MCP_REG_COUNT) {
         return;
     }
@@ -189,7 +198,8 @@ void MCP23S17::writeRegisters(uint8_t addr, uint8_t size) {
 /*! This private function writes the current value of a byte-size register
  * (as stored in the _reg array) out to the register in the chip.
  */
-void MCP23S17::writeRegisterOnly8(uint8_t addr, uint8_t offset) {
+template <typename UNIT>
+void MCP23S<UNIT>::writeRegisterOnly8(uint8_t addr, uint8_t offset) {
     if ((uint32_t) addr > MCP_REG_COUNT) {
         return;
     }
@@ -208,7 +218,8 @@ void MCP23S17::writeRegisterOnly8(uint8_t addr, uint8_t offset) {
 /*! This private function performs a bulk read on all the registers in the chip to
  *  ensure the _reg array contains all the correct current values.
  */
-void MCP23S17::readAll() {
+template <typename UNIT>
+void MCP23S<UNIT>::readAll() {
     readRegisters(0, MCP_REG_COUNT);
 }
 
@@ -216,7 +227,8 @@ void MCP23S17::readAll() {
  *  out to all the registers on the chip.  It is mainly used during the initialisation
  *  of the chip.
  */
-void MCP23S17::writeAll() {
+template <typename UNIT>
+void MCP23S<UNIT>::writeAll() {
     writeRegisters(0, MCP_REG_COUNT);
 }
 
@@ -235,7 +247,8 @@ void MCP23S17::writeAll() {
  *
  *      myExpander.pinMode(5, INPUT_PULLUP);
  */
-void MCP23S17::pinMode(uint8_t pin, uint8_t mode) {
+template <typename UNIT>
+void MCP23S<UNIT>::pinMode(uint8_t pin, uint8_t mode) {
     if (pin >= PIN_COUNT) {
         return;
     }
@@ -263,7 +276,8 @@ void MCP23S17::pinMode(uint8_t pin, uint8_t mode) {
  *
  *      myExpander.digitalWrite(3, HIGH);
  */
-void MCP23S17::digitalWrite(uint8_t pin, uint8_t value) {
+template <typename UNIT>
+void MCP23S<UNIT>::digitalWrite(uint8_t pin, uint8_t value) {
     if (pin >= PIN_COUNT) {
         return;
     }
@@ -277,7 +291,8 @@ void MCP23S17::digitalWrite(uint8_t pin, uint8_t value) {
     writeRegister(reg, regval);
 }
 
-void MCP23S17::enablePullup(uint8_t pin, bool enable) {
+template <typename UNIT>
+void MCP23S<UNIT>::enablePullup(uint8_t pin, bool enable) {
     if (pin >= PIN_COUNT) {
         return;
     }
@@ -299,7 +314,8 @@ void MCP23S17::enablePullup(uint8_t pin, bool enable) {
  *
  *      myExpander.setDir(5, INPUT);
  */
-void MCP23S17::setDir(uint8_t pin, uint8_t mode) {
+template <typename UNIT>
+void MCP23S<UNIT>::setDir(uint8_t pin, uint8_t mode) {
     if (pin >= PIN_COUNT) {
         return;
     }
@@ -319,7 +335,8 @@ void MCP23S17::setDir(uint8_t pin, uint8_t mode) {
  *
  *      byte value = myExpander.digitalRead(4);
  */
-uint8_t MCP23S17::digitalRead(uint8_t pin) {
+template <typename UNIT>
+uint8_t MCP23S<UNIT>::digitalRead(uint8_t pin) {
     if (pin >= PIN_COUNT) {
         return 0;
     }
@@ -349,7 +366,8 @@ uint8_t MCP23S17::digitalRead(uint8_t pin) {
  *
  *      myExpander.enableInterrupt(4, RISING);
  */
-void MCP23S17::enableInterrupt(uint8_t pin, uint8_t type) {
+template <typename UNIT>
+void MCP23S<UNIT>::enableInterrupt(uint8_t pin, uint8_t type) {
     if (pin >= PIN_COUNT) {
         return;
     }
@@ -384,7 +402,8 @@ void MCP23S17::enableInterrupt(uint8_t pin, uint8_t type) {
  *
  *      myExpander.disableInterrupt(4);
  */
-void MCP23S17::disableInterrupt(uint8_t pin) {
+template <typename UNIT>
+void MCP23S<UNIT>::disableInterrupt(uint8_t pin) {
     if (pin >= PIN_COUNT) {
         return;
     }
@@ -404,7 +423,8 @@ void MCP23S17::disableInterrupt(uint8_t pin) {
  *
  *      myExpander.setMirror(true);
  */
-void MCP23S17::setMirror(bool m) {
+template <typename UNIT>
+void MCP23S<UNIT>::setMirror(bool m) {
     if (m) {
         bitSet(_reg[MCP_IOCON], IOCON_MIRROR);
         bitSet(_reg[MCP_IOCON], IOCON_MIRROR + 8);
@@ -421,7 +441,8 @@ void MCP23S17::setMirror(bool m) {
  *
  *      unsigned int pins = myExpander.getInterruptPins();
  */
-MCP23S17::unit_t MCP23S17::getInterruptPins() {
+template <typename UNIT>
+typename MCP23S<UNIT>::unit_t MCP23S<UNIT>::getInterruptPins() {
     return readRegister(MCP_INTF);
 }
 
@@ -431,7 +452,8 @@ MCP23S17::unit_t MCP23S17::getInterruptPins() {
  *
  *      unsigned int pins = myExpander.getInterruptPins(0);
  */
-uint8_t MCP23S17::getInterruptPins(uint8_t port) {
+template <typename UNIT>
+uint8_t MCP23S<UNIT>::getInterruptPins(uint8_t port) {
     return readRegister8(MCP_INTF, port);
 }
 
@@ -444,7 +466,8 @@ uint8_t MCP23S17::getInterruptPins(uint8_t port) {
  *
  *      unsigned int pinValues = myExpander.getInterruptValue();
  */
-MCP23S17::unit_t MCP23S17::getInterruptValue() {
+template <typename UNIT>
+typename MCP23S<UNIT>::unit_t MCP23S<UNIT>::getInterruptValue() {
     return readRegister(MCP_INTCAP);
 }
 
@@ -460,7 +483,8 @@ MCP23S17::unit_t MCP23S17::getInterruptValue() {
  *
  *      unsigned int pinValues = myExpander.getInterruptValue(0);
  */
-uint8_t MCP23S17::getInterruptValue(uint8_t port) {
+template <typename UNIT>
+uint8_t MCP23S<UNIT>::getInterruptValue(uint8_t port) {
     return readRegister8(MCP_INTCAP, port);
 }
 
@@ -471,7 +495,8 @@ uint8_t MCP23S17::getInterruptValue(uint8_t port) {
  *
  *      myExpander.setInterruptLevel(HIGH);
  */
-void MCP23S17::setInterruptLevel(uint8_t level) {
+template <typename UNIT>
+void MCP23S<UNIT>::setInterruptLevel(uint8_t level) {
     if (level == LOW) {
         bitClear(_reg[MCP_IOCON], IOCON_INTPOL);
         bitClear(_reg[MCP_IOCON], IOCON_INTPOL + 8);
@@ -491,7 +516,8 @@ void MCP23S17::setInterruptLevel(uint8_t level) {
  *
  *      myExpander.setInterruptOD(true);
  */
-void MCP23S17::setInterruptOD(bool openDrain) {
+template <typename UNIT>
+void MCP23S<UNIT>::setInterruptOD(bool openDrain) {
     if (openDrain) {
         bitSet(_reg[MCP_IOCON], IOCON_ODR);
         bitSet(_reg[MCP_IOCON], IOCON_ODR + 8);
@@ -501,3 +527,6 @@ void MCP23S17::setInterruptOD(bool openDrain) {
     }
     writeRegisters(MCP_IOCON, 1);
 }
+
+template class MCP23S<uint16_t>;
+template class MCP23S<uint8_t>;

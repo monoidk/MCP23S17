@@ -44,7 +44,8 @@
 #include <SPI.h>
 #endif
 
-class MCP23S17 {
+template <typename UNIT>
+class MCP23S {
     public:
 #ifdef __PIC32MX__
         /*! SPI object created from the chipKIT DSPI library. */
@@ -53,7 +54,7 @@ class MCP23S17 {
         /*! SPI object created from the Arduino compatible SPI library. */
         typedef SPIClass _SPIClass;
 #endif
-        typedef uint16_t unit_t;
+        typedef UNIT unit_t;
         const uint8_t PIN_COUNT = sizeof(unit_t) * 8;
 
         // MCP23XXX IOCON settings - initialized as 0 on POR
@@ -90,7 +91,7 @@ class MCP23S17 {
             MCP_REG_COUNT
         };
 
-        unit_t _reg[MCP_REG_COUNT];   /*! Local mirrors of the 22 internal registers of the MCP23S17 chip, little-endian */
+        unit_t _reg[MCP_REG_COUNT];   /*! Local mirrors of the 22 internal registers of the MCP23Sxx chip, little-endian */
 
         void spi_begin();
         void spi_end();
@@ -126,8 +127,8 @@ class MCP23S17 {
         SPISettings spiSettings = SPISettings((uint32_t)8000000, MSBFIRST, SPI_MODE0);
 
     public:
-        MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr);
-        MCP23S17(_SPIClass &spi, uint8_t cs, uint8_t addr): MCP23S17(&spi, cs, addr) {};
+        MCP23S(_SPIClass *spi, uint8_t cs, uint8_t addr);
+        MCP23S(_SPIClass &spi, uint8_t cs, uint8_t addr): MCP23S(&spi, cs, addr) {};
 
         void begin_tree();
         void begin_light(bool preserve_vals);
@@ -206,5 +207,19 @@ class MCP23S17 {
         void enablePullup(uint8_t pin, bool enable);
         bool getEnabledPullup(uint8_t pin) { return !!bitRead(getEnabledPullups(), pin); }
         unit_t getEnabledPullups() { return getRegister(MCP_GPPU); }
+};
+
+/*
+class MCP23S08: public MCP23S<uint8_t> {
+    public:
+        MCP23S08(_SPIClass *spi, uint8_t cs, uint8_t addr): MCP23S(spi, cs, addr) {};
+        MCP23S08(_SPIClass &spi, uint8_t cs, uint8_t addr): MCP23S(&spi, cs, addr) {};
+};
+*/
+
+class MCP23S17: public MCP23S<uint16_t> {
+    public:
+        MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr): MCP23S(spi, cs, addr) {};
+        MCP23S17(_SPIClass &spi, uint8_t cs, uint8_t addr): MCP23S(&spi, cs, addr) {};
 };
 #endif
