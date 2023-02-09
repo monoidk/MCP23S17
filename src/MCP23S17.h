@@ -135,10 +135,61 @@ class MCP23S17 {
         void digitalWrite(uint8_t pin, uint8_t value);
         uint8_t digitalRead(uint8_t pin);
 
-        uint8_t readPort(uint8_t port);
-        unit_t readPort();
-        void writePort(uint8_t port, uint8_t val);
-        void writePort(uint16_t val);
+
+        /*! This function returns the entire 8-bit value of a GPIO port.  Note that
+         *  only the bits which correspond to a GPIO pin set to INPUT are valid.
+         *  Other pins should be ignored.  The only parameter defines which port (A/B)
+         *  to retrieve: 0 is port A and 1 (or anything other than 0) is port B.
+         *
+         *  Example:
+         *
+         *      byte portA = myExpander.readPort(0);
+         */
+        uint8_t readPort(uint8_t port) {
+            if (port >= sizeof(unit_t)) {
+                return -1;
+            }
+            return readRegister8(MCP_GPIO, port);
+        }
+
+        /*! This is a full version of the parameterised readPort function.  This
+         *  version reads the value of all ports, combining them into a single value.
+         *
+         *  Example:
+         *
+         *      unsigned int value = myExpander.readPort();
+         */
+        unit_t readPort() {
+            return readRegister(MCP_GPIO);
+        }
+
+        /*! This writes an 8-bit value to one of the IO port banks on the chip.
+         *  The value is output direct to any pins on that bank that are set as OUTPUT. Any
+         *  bits that correspond to pins set to INPUT are ignored.  As with the readPort
+         *  function the first parameter defines which bank to use (0 = A, 1 = B, ..).
+         *
+         *  Example:
+         *
+         *      myExpander.writePort(0, 0x55);
+         */
+        void writePort(uint8_t port, uint8_t val) {
+            if (port >= sizeof(unit_t))
+                return;
+            writeRegister8(MCP_OLAT, port, val);
+        }
+
+        /*! This is the 16-bit version of the writePort function.  This takes a single
+         *  16-bit value and splits it between the two IO ports, the upper half going to
+         *  port B and the lower to port A.
+         *
+         *  Example:
+         *
+         *      myExpander.writePort(0x55AA);
+         */
+        void writePort(uint16_t val) {
+            writeRegister(MCP_OLAT, val);
+        }
+
         void enableInterrupt(uint8_t pin, uint8_t type);
         void disableInterrupt(uint8_t pin);
         void setMirror(bool m);
