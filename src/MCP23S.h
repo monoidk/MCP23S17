@@ -238,9 +238,16 @@ class MCP23S {
         void setDir(uint8_t pin, uint8_t mode);
         unit_t getDirsInput() { return getRegister(MCP_IODIR); }
         unit_t readDirsInput() { return getRegister(MCP_IODIR); }
-        void enablePullup(uint8_t pin, bool enable);
-        bool getEnabledPullup(uint8_t pin) { return !!bitRead(getEnabledPullups(), pin); }
-        unit_t getEnabledPullups() { return getRegister(MCP_GPPU); }
+        void setPullup(uint8_t pin, bool enable) {
+            unit_t pu = getRegister(MCP_GPPU);
+            bitWrite(pu, pin, enable);
+            writeRegister(MCP_GPPU, pu);
+        }
+        bool getPullup(uint8_t pin) { return !!bitRead(getPullups(), pin); }
+        unit_t getPullups() { return getRegister(MCP_GPPU); }
+        void setPullups(unit_t enables) {
+            writeRegister(MCP_GPPU, enables);
+        }
 };
 
 

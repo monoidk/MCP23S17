@@ -218,13 +218,13 @@ void MCP23S<UNIT>::pinMode(uint8_t pin, uint8_t mode) {
     switch (mode) {
         case OUTPUT:
             setDir(pin, OUTPUT);
-            enablePullup(pin, false);
+            setPullup(pin, false);
             break;
 
         case INPUT:
         case INPUT_PULLUP:
             setDir(pin, INPUT);
-            enablePullup(pin, (mode == INPUT_PULLUP));
+            setPullup(pin, (mode == INPUT_PULLUP));
             break;
     }
 }
@@ -252,16 +252,6 @@ void MCP23S<UNIT>::digitalWrite(uint8_t pin, uint8_t value) {
     unit_t regval = getRegister(reg);
     bitWrite(regval, pin, value);
     writeRegister(reg, regval);
-}
-
-template <typename UNIT>
-void MCP23S<UNIT>::enablePullup(uint8_t pin, bool enable) {
-    if (pin >= PIN_COUNT) {
-        return;
-    }
-    unit_t pu = getRegister(MCP_GPPU);
-    bitWrite(pu, pin, enable);
-    writeRegister(MCP_GPPU, pu);
 }
 
 /*! Set pin direction as INPUT or OUTPUT.
