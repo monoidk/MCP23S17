@@ -252,6 +252,7 @@ class MCP23S {
         void setPullups(unit_t enables) {
             writeRegister(MCP_GPPU, enables);
         }
+	static const int32_t SPI_ERR_NO_RESPONSE = -(256+1);
 	int32_t test_spi();
 };
 

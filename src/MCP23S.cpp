@@ -482,6 +482,7 @@ void MCP23S<UNIT>::setInterruptOD(bool openDrain) {
 }
 
 /*! Test SPI communication with chip. Returns 0 on success, <0 on failure.
+ *  Should return SPI_ERR_NO_RESPONSE if no valid MCP is present.
  */
 template <typename UNIT>
 int32_t MCP23S<UNIT>::test_spi() {
@@ -494,6 +495,9 @@ int32_t MCP23S<UNIT>::test_spi() {
         unit_t val = i * 0x101;
         writeRegister(MCP_IPOL, (unit_t) val);
         if (readRegister(MCP_IPOL) != val)
+            // should be first error with i = 1
+            // -(256+i) = SPI_ERR_NO_RESPONSE
+            // if no valid MCP is present
             return -(256 + i);
     }
     // IPOL = 0xffff || 0xff
