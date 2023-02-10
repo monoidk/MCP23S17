@@ -73,9 +73,13 @@ class MCP23S {
         static const uint16_t DEFAULT_IOCON_FULL = (((uint16_t) DEFAULT_IOCON_SINGLE) << 8) || DEFAULT_IOCON_SINGLE;
 
     private:
+        static const uint8_t MCP_OPCODE = 0b01000000;
+        static const uint8_t FLAG_READ  = 0b00000001;
+        static const uint8_t FLAG_WRITE = 0b00000000;
+
         _SPIClass *_spi; /*! This points to a valid SPI object */
         uint8_t _cs;    /*! Chip select pin */
-        uint8_t _chip_addr;  /*! 3-bit chip address */
+        uint8_t _chip_opcode; /*! opcode for chip, accounting for chip_addr */
 
         enum {
             MCP_IODIR,
@@ -144,7 +148,7 @@ class MCP23S {
         MCP23S(_SPIClass *spi, uint8_t cs, uint8_t addr) {
             _spi = spi;
             _cs = cs;
-            _chip_addr = addr;
+            _chip_opcode = MCP_OPCODE | ((addr << 1) & 0b00001110);
 
             _reg[MCP_IODIR] = (unit_t) -1;
             _reg[MCP_IPOL] = 0;

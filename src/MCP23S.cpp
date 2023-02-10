@@ -68,8 +68,7 @@ void MCP23S<UNIT>::begin_tree() {
 template <typename UNIT>
 void MCP23S<UNIT>::write_iocon_default() {
     spi_begin();
-    uint8_t cmd = 0b01000000;
-    _spi->transfer(cmd);
+    _spi->transfer(MCP_OPCODE | FLAG_WRITE);
     _spi->transfer(MCP_IOCON * sizeof(unit_t));
     _spi->transfer(DEFAULT_IOCON_SINGLE);
     spi_end();
@@ -105,9 +104,8 @@ void MCP23S<UNIT>::readRegisters(uint8_t addr, uint8_t size) {
     if ((uint32_t) addr + size > MCP_REG_COUNT) {
         return;
     }
-    uint8_t cmd = 0b01000001 | ((_chip_addr & 0b111) << 1);
     spi_begin();
-    _spi->transfer(cmd);
+    _spi->transfer(_chip_opcode | FLAG_READ);
     _spi->transfer(addr * sizeof(unit_t));
     for (uint32_t i = 0; i < size; ++i) {
         unit_t reg = 0;
@@ -131,9 +129,8 @@ uint8_t MCP23S<UNIT>::readRegister8(uint8_t addr, uint8_t offset) {
     if (offset >= sizeof (unit_t)) {
         return -1;
     }
-    uint8_t cmd = 0b01000001 | ((_chip_addr & 0b111) << 1);
     spi_begin();
-    _spi->transfer(cmd);
+    _spi->transfer(_chip_opcode | FLAG_READ);
     _spi->transfer(addr * sizeof(unit_t) + offset);
     uint8_t byte = _spi->transfer(0xFF);
     set_byte(_reg[addr], offset, byte);
@@ -149,9 +146,8 @@ void MCP23S<UNIT>::writeRegisters(uint8_t addr, uint8_t size) {
     if ((uint32_t) addr + size > MCP_REG_COUNT) {
         return;
     }
-    uint8_t cmd = 0b01000000 | ((_chip_addr & 0b111) << 1);
     spi_begin();
-    _spi->transfer(cmd);
+    _spi->transfer(_chip_opcode | FLAG_WRITE);
     _spi->transfer(addr * sizeof(unit_t));
     for (uint32_t i = 0; i < size; ++i) {
         unit_t reg = _reg[addr++];
@@ -174,9 +170,8 @@ void MCP23S<UNIT>::writeRegisterOnly8(uint8_t addr, uint8_t offset) {
     if (offset >= sizeof(unit_t)) {
         return;
     }
-    uint8_t cmd = 0b01000000 | ((_chip_addr & 0b111) << 1);
     spi_begin();
-    _spi->transfer(cmd);
+    _spi->transfer(_chip_opcode | FLAG_WRITE);
     _spi->transfer(addr * sizeof(unit_t) + offset);
     uint8_t byte = get_byte(_reg[addr], offset);
     _spi->transfer(byte);
