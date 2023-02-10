@@ -255,16 +255,11 @@ class MCP23S {
 };
 
 
-class MCP23S09: public MCP23S<uint8_t> {
-    public:
-        MCP23S09(_SPIClass *spi, uint8_t cs, uint8_t addr, bool haen = true): MCP23S(spi, cs, addr, haen) {};
-        MCP23S09(_SPIClass &spi, uint8_t cs, uint8_t addr, bool haen = true): MCP23S(&spi, cs, addr, haen) {};
-};
+typedef MCP23S<uint8_t> MCP23S0x;
+typedef MCP23S0x MCP23S08;
+typedef MCP23S0x MCP23S09;
 
-
-class MCP23S17: public MCP23S<uint16_t> {
-    public:
-        MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr, bool haen = true): MCP23S(spi, cs, addr, haen) {};
-        MCP23S17(_SPIClass &spi, uint8_t cs, uint8_t addr, bool haen = true): MCP23S(&spi, cs, addr, haen) {};
-};
+typedef MCP23S<uint16_t> MCP23S1x;
+typedef MCP23S1x MCP23S17;
+typedef MCP23S1x MCP23S18;
 #endif
