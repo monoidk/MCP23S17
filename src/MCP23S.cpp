@@ -481,5 +481,45 @@ void MCP23S<UNIT>::setInterruptOD(bool openDrain) {
     pushRegisters(MCP_IOCON);
 }
 
+/*! Test SPI communication with chip. Returns 0 on success, <0 on failure.
+ */
+template <typename UNIT>
+int32_t MCP23S<UNIT>::test_spi() {
+    unit_t orig_ipol = getRegister(MCP_IPOL);
+    // check input polarity equals cached value
+    // (should be predefined value as we don't have access methods)
+    if (orig_ipol != readRegister(MCP_IPOL))
+        return -1;
+    for (uint32_t i = 0; i < 256; ++i) {
+        unit_t val = i * 0x101;
+        writeRegister(MCP_IPOL, (unit_t) val);
+        if (readRegister(MCP_IPOL) != val)
+            return -(256 + i);
+    }
+    // IPOL = 0xffff || 0xff
+    if (readRegister8(MCP_IPOL, 0) != 0xff)
+        return -2;
+    if (sizeof(unit_t) > 1) {
+        writeRegister8(MCP_IPOL, 1, 0);
+        // IPOL = 0x00ff
+        if (readRegister8(MCP_IPOL, 1) != 0x00)
+            return -3;
+    }
+    for (uint32_t i = 0; i < 256; ++i) {
+        unit_t val = i;
+        writeRegister8(MCP_IPOL, 0, (uint8_t) val);
+        if (readRegister(MCP_IPOL) != val)
+            return -(512 + i);
+    }
+    if (sizeof(unit_t) > 1) {
+        if (readRegister8(MCP_IPOL, 1) != 0x00)
+            return -4;
+    }
+    writeRegister(MCP_IPOL, orig_ipol);
+    if (orig_ipol != readRegister(MCP_IPOL))
+        return -5;
+    return 0;
+}
+
 template class MCP23S<uint16_t>;
 template class MCP23S<uint8_t>;

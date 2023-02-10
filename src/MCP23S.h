@@ -252,6 +252,7 @@ class MCP23S {
         void setPullups(unit_t enables) {
             writeRegister(MCP_GPPU, enables);
         }
+	int32_t test_spi();
 };
 
 
