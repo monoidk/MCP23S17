@@ -239,13 +239,13 @@ class MCP23S {
         unit_t getEnabledPullups() { return getRegister(MCP_GPPU); }
 };
 
-/*
-class MCP23S08: public MCP23S<uint8_t> {
+
+class MCP23S09: public MCP23S<uint8_t> {
     public:
-        MCP23S08(_SPIClass *spi, uint8_t cs, uint8_t addr): MCP23S(spi, cs, addr) {};
-        MCP23S08(_SPIClass &spi, uint8_t cs, uint8_t addr): MCP23S(&spi, cs, addr) {};
+        MCP23S09(_SPIClass *spi, uint8_t cs, uint8_t addr): MCP23S(spi, cs, addr) {};
+        MCP23S09(_SPIClass &spi, uint8_t cs, uint8_t addr): MCP23S(&spi, cs, addr) {};
 };
-*/
+
 
 class MCP23S17: public MCP23S<uint16_t> {
     public:
