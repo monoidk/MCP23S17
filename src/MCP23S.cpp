@@ -70,7 +70,7 @@ void MCP23S<UNIT>::write_iocon_default() {
     spi_begin();
     _spi->transfer(MCP_OPCODE | FLAG_WRITE);
     _spi->transfer(MCP_IOCON * sizeof(unit_t));
-    _spi->transfer(DEFAULT_IOCON_SINGLE);
+    _spi->transfer(default_iocon_single());
     spi_end();
 }
 

@@ -69,9 +69,8 @@ class MCP23S {
         static const uint8_t IOCON_INTCC  = 0;  // Interrupt cleared on reading INTCAP (not GPIO) register (MCP23XX8 only?)
 
         // default IOCON settings for MCP23S17
-        static const uint8_t DEFAULT_IOCON_SINGLE = (1 << IOCON_DISSLW) | (1 << IOCON_HAEN);
-        static const uint16_t DEFAULT_IOCON_FULL = (((uint16_t) DEFAULT_IOCON_SINGLE) << 8) || DEFAULT_IOCON_SINGLE;
-
+        uint8_t default_iocon_single() { return (1 << IOCON_DISSLW) | ((_haen?1:0) << IOCON_HAEN); }
+        uint16_t default_iocon_full() { return (uint16_t) default_iocon_single() * 0x0101; }
     private:
         static const uint8_t MCP_OPCODE = 0b01000000;
         static const uint8_t FLAG_READ  = 0b00000001;
@@ -97,6 +96,7 @@ class MCP23S {
         };
 
         unit_t _reg[MCP_REG_COUNT];   /*! Local mirrors of the 22 internal registers of the MCP23Sxx chip, little-endian */
+        bool _haen;
 
         void spi_begin();
         void spi_end();
@@ -145,24 +145,25 @@ class MCP23S {
          *      MCP23S17 myExpander(&SPI, 10, 0);
          *
          */
-        MCP23S(_SPIClass *spi, uint8_t cs, uint8_t addr) {
+        MCP23S(_SPIClass *spi, uint8_t cs, uint8_t addr, bool haen = true) {
             _spi = spi;
             _cs = cs;
             _chip_opcode = MCP_OPCODE | ((addr << 1) & 0b00001110);
+            _haen = haen;
 
             _reg[MCP_IODIR] = (unit_t) -1;
             _reg[MCP_IPOL] = 0;
             _reg[MCP_GPINTEN] = 0;
             _reg[MCP_DEFVAL] = 0;
             _reg[MCP_INTCON] = 0;
-            _reg[MCP_IOCON] = (unit_t) DEFAULT_IOCON_FULL; // slice to unit width
+            _reg[MCP_IOCON] = (unit_t) default_iocon_full(); // slice to unit width
             _reg[MCP_GPPU] = 0;
             _reg[MCP_INTF] = 0;
             _reg[MCP_INTCAP] = 0;
             _reg[MCP_GPIO] = 0;
             _reg[MCP_OLAT] = 0;
         }
-        MCP23S(_SPIClass &spi, uint8_t cs, uint8_t addr): MCP23S(&spi, cs, addr) {};
+        MCP23S(_SPIClass &spi, uint8_t cs, uint8_t addr, bool haen = true): MCP23S(&spi, cs, addr, haen) {};
 
         void begin_tree();
         void begin_light(bool preserve_vals);
@@ -238,6 +239,7 @@ class MCP23S {
         void setDir(uint8_t pin, uint8_t mode);
         unit_t getDirsInput() { return getRegister(MCP_IODIR); }
         unit_t readDirsInput() { return getRegister(MCP_IODIR); }
+        void setDirsInput(unit_t inputs) { writeRegister(MCP_IODIR, inputs); }
         void setPullup(uint8_t pin, bool enable) {
             unit_t pu = getRegister(MCP_GPPU);
             bitWrite(pu, pin, enable);
@@ -253,14 +255,14 @@ class MCP23S {
 
 class MCP23S09: public MCP23S<uint8_t> {
     public:
-        MCP23S09(_SPIClass *spi, uint8_t cs, uint8_t addr): MCP23S(spi, cs, addr) {};
-        MCP23S09(_SPIClass &spi, uint8_t cs, uint8_t addr): MCP23S(&spi, cs, addr) {};
+        MCP23S09(_SPIClass *spi, uint8_t cs, uint8_t addr, bool haen = true): MCP23S(spi, cs, addr, haen) {};
+        MCP23S09(_SPIClass &spi, uint8_t cs, uint8_t addr, bool haen = true): MCP23S(&spi, cs, addr, haen) {};
 };
 
 
 class MCP23S17: public MCP23S<uint16_t> {
     public:
-        MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr): MCP23S(spi, cs, addr) {};
-        MCP23S17(_SPIClass &spi, uint8_t cs, uint8_t addr): MCP23S(&spi, cs, addr) {};
+        MCP23S17(_SPIClass *spi, uint8_t cs, uint8_t addr, bool haen = true): MCP23S(spi, cs, addr, haen) {};
+        MCP23S17(_SPIClass &spi, uint8_t cs, uint8_t addr, bool haen = true): MCP23S(&spi, cs, addr, haen) {};
 };
 #endif
