@@ -1,15 +1,19 @@
 {
-  "name": "MCP23S17",
-  "version": "1.1.5",
-  "description": "Arduino library for MCP23S17 IO Expanders\n",
+  "name": "MCP23Sxx",
+  "version": "2.0.0",
+  "description": "Arduino library for MCP23S08, MCP23S09, MCP23S17, MCP23S18 IO Expanders\n",
   "keywords": "expander, spi",
   "repository":
   {
     "type": "git",
-    "url": "https://github.com/MajenkoLibraries/MCP23S17.git"
+    "url": "https://github.com/monoidk/MCP23Sxx.git"
   },
   "authors":
   [
+    {
+      "name": "Ivan Labáth",
+      "email": "ivan.labath@monoid.sk"
+    },
     {
       "name": "Matt Jenkins",
       "email": "matt@majenko.co.uk",
