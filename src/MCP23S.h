@@ -147,16 +147,16 @@ class MCP23S {
             _chip_addr = addr;
 
             _reg[MCP_IODIR] = (unit_t) -1;
-            _reg[MCP_IPOL] = 0x0000;
-            _reg[MCP_GPINTEN] = 0x0000;
-            _reg[MCP_DEFVAL] = 0x0000;
-            _reg[MCP_INTCON] = 0x0000;
-            _reg[MCP_IOCON] = DEFAULT_IOCON_FULL;
-            _reg[MCP_GPPU] = 0x0000;
-            _reg[MCP_INTF] = 0x0000;
-            _reg[MCP_INTCAP] = 0x0000;
-            _reg[MCP_GPIO] = 0x0000;
-            _reg[MCP_OLAT] = 0x0000;
+            _reg[MCP_IPOL] = 0;
+            _reg[MCP_GPINTEN] = 0;
+            _reg[MCP_DEFVAL] = 0;
+            _reg[MCP_INTCON] = 0;
+            _reg[MCP_IOCON] = (unit_t) DEFAULT_IOCON_FULL; // slice to unit width
+            _reg[MCP_GPPU] = 0;
+            _reg[MCP_INTF] = 0;
+            _reg[MCP_INTCAP] = 0;
+            _reg[MCP_GPIO] = 0;
+            _reg[MCP_OLAT] = 0;
         }
         MCP23S(_SPIClass &spi, uint8_t cs, uint8_t addr): MCP23S(&spi, cs, addr) {};
 
