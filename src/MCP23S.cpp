@@ -31,38 +31,6 @@
 
 #include <MCP23S.h>
 
-/*! The constructor takes three parameters.  The first is an SPI class
- *  pointer.  This is the address of an SPI object (either the default
- *  SPI object on the Arduino, or an object made using the DSPIx classes
- *  on the chipKIT).  The second parameter is the chip select pin number
- *  to use when communicating with the chip.  The third is the internal
- *  address number of the chip.  This is controlled by the three Ax pins
- *  on the chip.
- *
- *  Example:
- *
- *      MCP23S17 myExpander(&SPI, 10, 0);
- *
- */
-template <typename UNIT>
-MCP23S<UNIT>::MCP23S(_SPIClass *spi, uint8_t cs, uint8_t addr) {
-    _spi = spi;
-    _cs = cs;
-    _chip_addr = addr;
-
-    _reg[MCP_IODIR] = (unit_t) -1;
-    _reg[MCP_IPOL] = 0x0000;
-    _reg[MCP_GPINTEN] = 0x0000;
-    _reg[MCP_DEFVAL] = 0x0000;
-    _reg[MCP_INTCON] = 0x0000;
-    _reg[MCP_IOCON] = DEFAULT_IOCON_FULL;
-    _reg[MCP_GPPU] = 0x0000;
-    _reg[MCP_INTF] = 0x0000;
-    _reg[MCP_INTCAP] = 0x0000;
-    _reg[MCP_GPIO] = 0x0000;
-    _reg[MCP_OLAT] = 0x0000;
-}
-
 template <typename UNIT>
 void MCP23S<UNIT>::spi_begin() {
     _spi->beginTransaction(spiSettings);
