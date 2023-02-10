@@ -100,7 +100,7 @@ void MCP23S<UNIT>::begin_light(bool preserve_vals) {
  * a number of unit-size values, and stores them in the _reg array for later usage.
  */
 template <typename UNIT>
-void MCP23S<UNIT>::readRegisters(uint8_t addr, uint8_t size) {
+void MCP23S<UNIT>::fetchRegisters(uint8_t addr, uint8_t size) {
     if ((uint32_t) addr + size > MCP_REG_COUNT) {
         return;
     }
@@ -142,7 +142,7 @@ uint8_t MCP23S<UNIT>::readRegister8(uint8_t addr, uint8_t offset) {
  * (as stored in the _reg array) out to the register in the chip.
  */
 template <typename UNIT>
-void MCP23S<UNIT>::writeRegisters(uint8_t addr, uint8_t size) {
+void MCP23S<UNIT>::pushRegisters(uint8_t addr, uint8_t size) {
     if ((uint32_t) addr + size > MCP_REG_COUNT) {
         return;
     }
@@ -163,7 +163,7 @@ void MCP23S<UNIT>::writeRegisters(uint8_t addr, uint8_t size) {
  * (as stored in the _reg array) out to the register in the chip.
  */
 template <typename UNIT>
-void MCP23S<UNIT>::writeRegisterOnly8(uint8_t addr, uint8_t offset) {
+void MCP23S<UNIT>::pushRegister8(uint8_t addr, uint8_t offset) {
     if ((uint32_t) addr > MCP_REG_COUNT) {
         return;
     }
@@ -183,7 +183,7 @@ void MCP23S<UNIT>::writeRegisterOnly8(uint8_t addr, uint8_t offset) {
  */
 template <typename UNIT>
 void MCP23S<UNIT>::readAll() {
-    readRegisters(0, MCP_REG_COUNT);
+    fetchRegisters(0, MCP_REG_COUNT);
 }
 
 /*! This private function performs a bulk write of all the data in the _reg array
@@ -192,7 +192,7 @@ void MCP23S<UNIT>::readAll() {
  */
 template <typename UNIT>
 void MCP23S<UNIT>::writeAll() {
-    writeRegisters(0, MCP_REG_COUNT);
+    pushRegisters(0, MCP_REG_COUNT);
 }
 
 /*! Just like the pinMode() function of the Arduino API, this function sets the
@@ -385,7 +385,7 @@ void MCP23S<UNIT>::setMirror(bool m) {
         bitClear(_reg[MCP_IOCON], IOCON_MIRROR);
         bitClear(_reg[MCP_IOCON], IOCON_MIRROR + 8);
     }
-    writeRegisters(MCP_IOCON);
+    pushRegisters(MCP_IOCON);
 }
 
 /*! This function returns a 16-bit bitmap of the the pin or pins that have cause an interrupt to fire.
@@ -457,7 +457,7 @@ void MCP23S<UNIT>::setInterruptLevel(uint8_t level) {
         bitSet(_reg[MCP_IOCON], IOCON_INTPOL);
         bitSet(_reg[MCP_IOCON], IOCON_INTPOL + 8);
     }
-    writeRegisters(MCP_IOCON, 1);
+    pushRegisters(MCP_IOCON);
 }
 
 /*! Using this function it is possible to configure the interrupt output pins to be open
@@ -478,7 +478,7 @@ void MCP23S<UNIT>::setInterruptOD(bool openDrain) {
         bitClear(_reg[MCP_IOCON], IOCON_ODR);
         bitClear(_reg[MCP_IOCON], IOCON_ODR + 8);
     }
-    writeRegisters(MCP_IOCON, 1);
+    pushRegisters(MCP_IOCON);
 }
 
 template class MCP23S<uint16_t>;

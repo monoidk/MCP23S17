@@ -107,7 +107,8 @@ class MCP23S {
             data = (data & mask) | ((unit_t) byte << offset);
         }
 
-        void readRegisters(uint8_t addr, uint8_t size = 1);
+	/* Fetch register value from chip */
+        void fetchRegisters(uint8_t addr, uint8_t size = 1);
         /* Get cached value of register (1 byte) */
         uint8_t getRegister8(uint8_t addr, uint8_t offset) { return get_byte(_reg[addr], offset); }
         /* Get cached value of register (little-endian) */
@@ -115,15 +116,16 @@ class MCP23S {
         /* Read register and return value (1 byte) */
         uint8_t readRegister8(uint8_t addr, uint8_t offset);
         /* Read register and return value (little-endian) */
-        unit_t readRegister(uint8_t addr) { readRegisters(addr, 1); return getRegister(addr); }
-        void writeRegisters(uint8_t addr, uint8_t size = 1);
+        unit_t readRegister(uint8_t addr) { fetchRegisters(addr, 1); return getRegister(addr); }
+	/* Push register value to chip */
+        void pushRegisters(uint8_t addr, uint8_t size = 1);
+        void pushRegister8(uint8_t addr, uint8_t offset);
+        void writeRegister(uint8_t addr, unit_t val) {
+            _reg[addr] = val; pushRegisters(addr, 1);
+        }
         void writeRegister8(uint8_t addr, uint8_t offset, uint8_t val) {
             set_byte(_reg[addr], offset, val);
-            writeRegisterOnly8(addr, offset);
-        }
-        void writeRegisterOnly8(uint8_t addr, uint8_t offset);
-        void writeRegister(uint8_t addr, unit_t val) {
-            _reg[addr] = val; writeRegisters(addr, 1);
+            pushRegister8(addr, offset);
         }
         void readAll();
         void writeAll();
