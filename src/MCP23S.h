@@ -228,6 +228,12 @@ class MCP23S {
             writeRegister(MCP_OLAT, val);
         }
 
+        /*! Returns cached value of the output latches.
+         */
+        unit_t getPort() {
+            return getRegister(MCP_OLAT);
+        }
+
         void enableInterrupt(uint8_t pin, uint8_t type);
         void disableInterrupt(uint8_t pin);
         void setMirror(bool m);
