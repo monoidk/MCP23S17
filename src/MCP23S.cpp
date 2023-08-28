@@ -44,9 +44,11 @@ void MCP23S<UNIT>::spi_end() {
 }
 
 /*! The begin_tree function performs the initial configuration of the IO expander chip.
- *  Not only does it set up the SPI communications, but it also configures the chip
- *  for address-based communication and sets the default parameters and registers
- *  to sensible values.
+ *
+ *  Unlike begin_light, this function first initializes spi (spi->begin()) and CS pin mode (OUTPUT).
+ *
+ *  Like begin_light(), begin_tree() configures the chip for address-based communication
+ *  and sets the default parameters and registers. It does not preserve GPIO configuration or state.
  *
  *  Example:
  *
