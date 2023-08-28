@@ -65,15 +65,6 @@ void MCP23S<UNIT>::begin_tree() {
     writeAll();
 }
 
-template <typename UNIT>
-void MCP23S<UNIT>::write_iocon_default() {
-    spi_begin();
-    _spi->transfer(MCP_OPCODE | FLAG_WRITE);
-    _spi->transfer(MCP_IOCON * sizeof(unit_t));
-    _spi->transfer(default_iocon_single());
-    spi_end();
-}
-
 /*! The begin_light function performs the initial configuration of the MCP IO expander chip only.
  *  It configures the chip for address-based communication and sets the default parameters and registers,
  *  optionally preserving GPIO output configuration - direction, pullup and output latches.
@@ -94,6 +85,15 @@ void MCP23S<UNIT>::begin_light(bool preserve_vals) {
         readRegister(MCP_OLAT);
     }
     writeAll();
+}
+
+template <typename UNIT>
+void MCP23S<UNIT>::write_iocon_default() {
+    spi_begin();
+    _spi->transfer(MCP_OPCODE | FLAG_WRITE);
+    _spi->transfer(MCP_IOCON * sizeof(unit_t));
+    _spi->transfer(default_iocon_single());
+    spi_end();
 }
 
 /*! This private function reads from the register array on the chip
