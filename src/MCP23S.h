@@ -172,7 +172,23 @@ class MCP23S {
         void pinMode(uint8_t pin, uint8_t mode);
         void digitalWrite(uint8_t pin, uint8_t value);
         uint8_t digitalRead(uint8_t pin);
-
+        /*! Sets an output latch (getPort, set-bit, writePort).
+         */
+        void writePin(uint8_t pin, bool value) {
+            unit_t regval = getPort();
+            bitWrite(regval, pin, value);
+            writePort(regval);
+        }
+        /*! Returns cached value of an output latch (bit of getPort).
+         */
+        bool getPin(uint8_t pin) {
+            return bitRead(getPort(), pin);
+        }
+        /*! Reads value of GPIO pin (bit of readPort).
+         */
+        bool readPin(uint8_t pin) {
+            return bitRead(readPort(), pin);
+        }
 
         /*! This function returns the entire 8-bit value of a GPIO port.  Note that
          *  only the bits which correspond to a GPIO pin set to INPUT are valid.
