@@ -72,9 +72,9 @@ class MCP23S {
         uint8_t default_iocon_single() { return (1 << IOCON_DISSLW) | ((_haen?1:0) << IOCON_HAEN); }
         uint16_t default_iocon_full() { return (uint16_t) default_iocon_single() * 0x0101; }
     private:
-        static const uint8_t MCP_OPCODE = 0b01000000;
-        static const uint8_t FLAG_READ  = 0b00000001;
-        static const uint8_t FLAG_WRITE = 0b00000000;
+        static const uint8_t MCP_OPCODE = 0b0100'0000;
+        static const uint8_t FLAG_READ  = 0b0000'0001;
+        static const uint8_t FLAG_WRITE = 0b0000'0000;
 
         _SPIClass *_spi; /*! This points to a valid SPI object */
         uint8_t _cs;    /*! Chip select pin */
@@ -131,7 +131,7 @@ class MCP23S {
         void writeAll();
         void write_iocon_default();
 
-        SPISettings spiSettings = SPISettings((uint32_t)8000000, MSBFIRST, SPI_MODE0);
+        SPISettings spiSettings = SPISettings((uint32_t)8'000'000, MSBFIRST, SPI_MODE0);
 
     public:
         /*! The constructor takes three parameters.  The first is an SPI class
@@ -150,7 +150,7 @@ class MCP23S {
         MCP23S(_SPIClass *spi, uint8_t cs, uint8_t addr, bool haen = true) {
             _spi = spi;
             _cs = cs;
-            _chip_opcode = MCP_OPCODE | ((addr << 1) & 0b00001110);
+            _chip_opcode = MCP_OPCODE | ((addr << 1) & 0b0000'1110);
             _haen = haen;
 
             _reg[MCP_IODIR] = (unit_t) -1;
